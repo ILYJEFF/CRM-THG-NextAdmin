@@ -14,5 +14,6 @@ Root: `thg-crm` (deploy target for `crm.thehammittgroup.com`).
 - **Pipeline / stage UI**: `ContactStatusSelect.tsx`, `ContactStageTableCell.tsx` (list row), `ContactHeroPipelineStrip.tsx` (hero); values: `src/lib/crm/pipeline.ts`
 - **Hero / inquiry**: `ContactRecordHero.tsx`, `ContactSubmissionMessagePanel.tsx` (edit or clear submission message via `updateContactMessage` / `clearContactMessage` in `crm.ts`)
 - **Data model**: `prisma/schema.prisma` (`CrmContact`, `CrmClient`, etc.)
+- **Desk reference (fees, warranty, ops)**: `src/app/admin/playbook/page.tsx` (nav: Desk playbook)
 
-The marketing site repo is separate (`thehammittgroup-website`). Sync from site forms uses integration routes under `src/app/api/integrations/`.
+The marketing site repo is separate (`thehammittgroup-website`). Sync from site forms uses integration routes under `src/app/api/integrations/`. Public contact form does not collect pay band; CRM `payBand` stays optional on ingest.

@@ -19,10 +19,10 @@ export default async function AdminLayout({
   ).replace(/\/$/, "");
 
   return (
-    <div className="min-h-dvh flex bg-[#f4f2ee] text-zinc-900">
-      <aside className="hidden min-h-dvh w-64 shrink-0 flex-col border-r border-zinc-800/80 bg-[#0f1419] text-zinc-300 md:flex">
-        <div className="border-b border-zinc-800/80 p-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
+    <div className="min-h-dvh flex bg-gradient-to-br from-[#ebe8e2] via-[#f4f2ee] to-[#e8e4dc] text-zinc-900">
+      <aside className="hidden min-h-dvh w-64 shrink-0 flex-col border-r border-zinc-800/90 bg-gradient-to-b from-[#1a1f28] via-[#0f1419] to-[#0a0c10] text-zinc-300 md:flex">
+        <div className="border-b border-zinc-800/80 bg-zinc-950/20 p-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-500/80">
             The Hammitt Group
           </p>
           <h1 className="mt-1 text-lg font-semibold tracking-tight text-white">
@@ -61,10 +61,10 @@ export default async function AdminLayout({
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
         <MobileHeader />
         <main
-          className="flex-1 overflow-y-auto pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-8"
+          className="flex-1 overflow-y-auto pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-10"
           id="crm-main"
         >
-          <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-5 sm:py-6 md:px-8 md:py-8">
+          <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-5 sm:py-7 md:px-8 md:py-10">
             <CrmSchemaBanner gate={gate} />
             {children}
           </div>

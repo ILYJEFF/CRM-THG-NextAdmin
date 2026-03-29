@@ -11,6 +11,7 @@ function titleForPath(path: string): { title: string; back?: string } {
   if (path === "/admin/jobs") return { title: "Job orders" };
   if (path === "/admin/candidates") return { title: "Talent pipeline" };
   if (path === "/admin/companies") return { title: "Company accounts" };
+  if (path === "/admin/playbook") return { title: "Desk playbook", back: "/admin" };
   if (path.startsWith("/admin/clients/"))
     return { title: "Client", back: "/admin/clients" };
   if (path.startsWith("/admin/contacts/"))

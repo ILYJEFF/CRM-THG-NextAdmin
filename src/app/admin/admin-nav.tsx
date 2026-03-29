@@ -51,6 +51,7 @@ export function AdminNav() {
     <div className="flex flex-col gap-5">
       <NavGroup label="Workspace">
         <NavLink href="/admin">Recruiting desk</NavLink>
+        <NavLink href="/admin/playbook">Desk playbook</NavLink>
       </NavGroup>
       <NavGroup label="Pipeline">
         <NavLink href="/admin/contacts">Client leads</NavLink>

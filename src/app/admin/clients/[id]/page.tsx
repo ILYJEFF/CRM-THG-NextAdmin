@@ -129,6 +129,20 @@ export default async function ClientDetailPage({
         sourceLeadId={sourceLead?.id ?? null}
       />
 
+      <aside className="rounded-2xl border border-violet-200/70 bg-gradient-to-r from-violet-50/80 to-white px-4 py-3 text-sm text-zinc-700 shadow-sm">
+        <Link
+          href="/admin/playbook#accounts"
+          className="font-semibold text-violet-900 hover:underline"
+        >
+          Account maintenance playbook
+        </Link>
+        <span className="text-zinc-600">
+          {" "}
+          Fee framing, warranty reminders, and quarterly care. Confirm against
+          signed agreements before quoting.
+        </span>
+      </aside>
+
       <Suspense fallback={<TabsFallback />}>
         <RecordEntityTabs defaultTabId="overview" tabs={tabDefs}>
           <RecordTabPanel id="overview">

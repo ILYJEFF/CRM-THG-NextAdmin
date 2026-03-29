@@ -180,6 +180,14 @@ export default async function AdminHomePage() {
               Job orders pipeline
             </Link>
           </li>
+          <li>
+            <Link
+              href="/admin/playbook"
+              className="inline-flex min-h-10 items-center rounded-full bg-gradient-to-r from-amber-100 to-violet-100 px-4 text-sm font-semibold text-zinc-900 ring-1 ring-amber-200/80 transition hover:from-amber-50 hover:to-violet-50"
+            >
+              Desk playbook
+            </Link>
+          </li>
         </ul>
       </section>
 
