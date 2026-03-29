@@ -22,7 +22,7 @@ export function CrmPageHeader({
             {title}
           </h1>
           {description ? (
-            <p className="mt-2 text-sm leading-relaxed text-zinc-600 md:max-w-4xl">
+            <p className="mt-1.5 text-sm leading-snug text-zinc-600">
               {description}
             </p>
           ) : null}

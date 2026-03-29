@@ -287,28 +287,28 @@ export function DeskUnifiedRows({
         )}
       </ul>
 
-      <div className="hidden overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-lg shadow-zinc-900/[0.06] ring-1 ring-zinc-950/[0.04] md:block">
+      <div className="hidden overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-sm ring-1 ring-zinc-950/[0.03] md:block">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 bg-gradient-to-r from-amber-50/80 to-white">
-                <th className="w-10 px-2 py-3.5" aria-hidden />
-                <th className="whitespace-nowrap px-3 py-3.5 font-semibold text-zinc-700">
+              <tr className="border-b border-zinc-200 bg-gradient-to-r from-amber-50/70 to-white">
+                <th className="w-9 px-1.5 py-2" aria-hidden />
+                <th className="whitespace-nowrap px-2.5 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-600">
                   Received
                 </th>
-                <th className="min-w-[140px] px-3 py-3.5 font-semibold text-zinc-700">
+                <th className="min-w-[120px] px-2.5 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-600">
                   Name
                 </th>
-                <th className="whitespace-nowrap px-3 py-3.5 font-semibold text-zinc-700">
+                <th className="whitespace-nowrap px-2.5 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-600">
                   Type
                 </th>
-                <th className="min-w-[160px] px-3 py-3.5 font-semibold text-zinc-700">
+                <th className="min-w-[140px] px-2.5 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-600">
                   Email
                 </th>
-                <th className="whitespace-nowrap px-3 py-3.5 font-semibold text-zinc-700">
+                <th className="whitespace-nowrap px-2.5 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-600">
                   Market
                 </th>
-                <th className="min-w-[120px] px-3 py-3.5 font-semibold text-zinc-700">
+                <th className="min-w-[100px] px-2.5 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-600">
                   Stage
                 </th>
               </tr>
@@ -338,24 +338,24 @@ export function DeskUnifiedRows({
                           open ? "bg-amber-50/30" : "hover:bg-zinc-50/80"
                         )}
                       >
-                        <td className="px-2 py-3 align-top">
+                        <td className="px-1.5 py-1.5 align-top">
                           <button
                             type="button"
                             onClick={() => toggle(row.rowKey)}
-                            className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-600 hover:bg-zinc-200/40"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-600 hover:bg-zinc-200/40"
                             aria-expanded={open}
                             aria-label={open ? "Collapse row" : "Expand row"}
                           >
                             <Chevron open={open} />
                           </button>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-3 align-top text-zinc-600">
+                        <td className="whitespace-nowrap px-2.5 py-2 align-top text-zinc-600">
                           {formatCrm(row.createdAt, "MMM d, yyyy")}
-                          <span className="block text-xs text-zinc-400">
+                          <span className="block text-[11px] text-zinc-400">
                             {formatCrm(row.createdAt, "h:mm a")}
                           </span>
                         </td>
-                        <td className="px-3 py-3 align-top">
+                        <td className="px-2.5 py-2 align-top">
                           <span className="font-medium text-zinc-900">
                             {row.variant === "lead"
                               ? row.contactName
@@ -367,10 +367,10 @@ export function DeskUnifiedRows({
                             </span>
                           ) : null}
                         </td>
-                        <td className="px-3 py-3 align-top">
+                        <td className="px-2.5 py-2 align-top">
                           <span
                             className={cn(
-                              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset",
+                              "inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset",
                               row.variant === "lead"
                                 ? "bg-violet-50 text-violet-900 ring-violet-200/80"
                                 : "bg-amber-50 text-amber-950 ring-amber-200/80"
@@ -379,13 +379,13 @@ export function DeskUnifiedRows({
                             {row.variant === "lead" ? "Lead" : "Client"}
                           </span>
                         </td>
-                        <td className="max-w-[200px] break-all px-3 py-3 align-top text-zinc-700">
+                        <td className="max-w-[min(220px,32vw)] break-all px-2.5 py-2 align-top text-[13px] text-zinc-700">
                           {row.email}
                         </td>
-                        <td className="px-3 py-3 align-top text-zinc-600">
+                        <td className="px-2.5 py-2 align-top text-zinc-600">
                           {row.city}
                         </td>
-                        <td className="px-3 py-3 align-top">
+                        <td className="px-2.5 py-2 align-top">
                           {row.variant === "lead" ? (
                             <StatusBadge
                               status={row.status}

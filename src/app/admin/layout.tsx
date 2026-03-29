@@ -61,13 +61,17 @@ export default async function AdminLayout({
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
         <MobileHeader />
         <main
-          className="flex-1 overflow-y-auto pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-10"
+          className="flex-1 overflow-y-auto pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-0"
           id="crm-main"
         >
-          <div className="w-full px-3 pb-6 pt-3 sm:px-4 sm:pb-8 sm:pt-5 md:px-6 lg:px-8 lg:pb-10 lg:pt-6">
-            <CrmSchemaBanner gate={gate} />
-            <div className="min-h-[calc(100dvh-6rem)] w-full rounded-xl border border-zinc-200/70 bg-white/[0.95] p-4 shadow-sm ring-1 ring-zinc-950/[0.03] sm:rounded-2xl sm:p-6 md:min-h-0 md:p-8">
-              {children}
+          <div className="flex w-full flex-col md:min-h-[calc(100dvh-0px)]">
+            <div className="px-3 pb-2 pt-3 sm:px-4 md:border-b md:border-zinc-200/70 md:bg-white/80 md:px-6 md:pb-3 md:pt-4 lg:px-8">
+              <CrmSchemaBanner gate={gate} />
+            </div>
+            <div className="mx-3 mb-6 min-h-[calc(100dvh-7rem)] flex-1 rounded-2xl border border-zinc-200/70 bg-white/[0.98] shadow-sm ring-1 ring-zinc-950/[0.03] sm:mx-4 md:mx-0 md:mb-0 md:min-h-0 md:rounded-none md:border-0 md:shadow-none md:ring-0">
+              <div className="p-4 pb-8 sm:p-5 md:min-h-[calc(100dvh-3.5rem)] md:p-6 md:pb-12 lg:px-8 lg:py-6 lg:pb-12 xl:px-10 xl:py-7 xl:pb-14">
+                {children}
+              </div>
             </div>
           </div>
         </main>

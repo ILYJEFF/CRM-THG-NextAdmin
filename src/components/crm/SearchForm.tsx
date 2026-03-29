@@ -26,7 +26,10 @@ export function SearchForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex gap-2">
+    <form
+      onSubmit={onSubmit}
+      className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-2"
+    >
       <label className="sr-only" htmlFor="crm-search">
         Search
       </label>
@@ -38,11 +41,11 @@ export function SearchForm({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        className="min-h-12 flex-1 rounded-2xl border border-zinc-200 bg-white px-4 text-base text-zinc-900 shadow-sm outline-none ring-0 placeholder:text-zinc-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30"
+        className="min-h-12 w-full min-w-0 flex-1 rounded-xl border border-zinc-200 bg-white px-4 text-base text-zinc-900 shadow-sm outline-none ring-0 placeholder:text-zinc-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 sm:rounded-2xl"
       />
       <button
         type="submit"
-        className="min-h-12 shrink-0 rounded-2xl bg-[#0f1419] px-5 text-sm font-semibold text-white active:bg-zinc-800"
+        className="min-h-12 w-full shrink-0 rounded-xl bg-[#0f1419] px-5 text-sm font-semibold text-white active:bg-zinc-800 sm:w-auto sm:rounded-2xl"
       >
         Go
       </button>

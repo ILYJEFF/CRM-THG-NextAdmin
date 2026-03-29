@@ -265,37 +265,33 @@ export default async function AdminDeskPage({
     <div className="space-y-5 md:space-y-6">
       <CrmPageHeader
         title="Desk"
-        className="mb-5 pb-4 md:mb-6"
-        description={`${viewLabel}. Expand a row for full detail and to change stage or convert. ${rows.length} of ${total} on this page (${safePage} / ${pages}).`}
+        className="mb-4 pb-4 md:mb-5 md:pb-5"
+        description={`${viewLabel}. Expand a row for notes, stage, and convert. Showing ${rows.length} of ${total} · page ${safePage} of ${pages}.`}
       />
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-        <div className="w-full shrink-0 lg:max-w-sm">
-          <DeskViewLinks current={navQuery} />
+      <div className="space-y-3 md:space-y-4">
+        <DeskViewLinks current={navQuery} />
+        <div className="rounded-xl border border-zinc-200/70 bg-zinc-50/40 p-3 md:p-3.5">
+          <Suspense fallback={<SearchFallback />}>
+            <SearchForm placeholder="Search name, email, company, city…" />
+          </Suspense>
         </div>
-        <div className="min-w-0 flex-1 space-y-4">
-          <div className="rounded-xl border border-zinc-200/70 bg-zinc-50/50 p-3 md:p-4">
-            <Suspense fallback={<SearchFallback />}>
-              <SearchForm placeholder="Search name, email, company, city…" />
-            </Suspense>
+
+        <ListToolbar
+          listPath={LIST_PATH}
+          exportHref={exportHref}
+          current={navQuery}
+          sort={sort}
+        />
+
+        {chips.length > 0 ? (
+          <div className="rounded-xl border border-zinc-200/60 bg-zinc-50/30 px-2 py-2.5 md:px-3 md:py-3">
+            <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+              Stage
+            </p>
+            <FilterChips chips={chips} />
           </div>
-
-          <ListToolbar
-            listPath={LIST_PATH}
-            exportHref={exportHref}
-            current={navQuery}
-            sort={sort}
-          />
-
-          {chips.length > 0 ? (
-            <div className="rounded-xl border border-zinc-200/60 bg-white/60 px-2 py-3 md:px-3">
-              <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                Stage
-              </p>
-              <FilterChips chips={chips} />
-            </div>
-          ) : null}
-        </div>
+        ) : null}
       </div>
 
       <DeskUnifiedRows
