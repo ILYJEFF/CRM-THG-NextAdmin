@@ -7,7 +7,6 @@ import { SearchForm } from "@/components/crm/SearchForm";
 import { ListToolbar } from "@/components/crm/ListToolbar";
 import { FilterChips } from "@/components/crm/FilterChips";
 import { PaginationBar } from "@/components/crm/PaginationBar";
-import { WebsitePipelineFilterSelect } from "@/components/crm/WebsitePipelineFilterSelect";
 import {
   DeskUnifiedRows,
   type DeskClientRow,
@@ -22,6 +21,7 @@ import {
   clientWhere,
   listQueryFromSearchParams,
   parseDeskView,
+  type ListQueryBase,
 } from "@/lib/crm/list-query";
 import {
   PAGE_SIZE,
@@ -62,7 +62,7 @@ const clientListSelect = {
 function SearchFallback() {
   return (
     <div
-      className="min-h-12 animate-pulse rounded-2xl bg-zinc-200/60"
+      className="min-h-12 animate-pulse rounded-xl bg-zinc-200/50"
       aria-hidden
     />
   );
@@ -129,6 +129,16 @@ function toClientRow(c: {
   };
 }
 
+function deskNavQuery(lq: ListQueryBase): ListQueryBase {
+  return {
+    q: lq.q,
+    status: lq.status,
+    sort: lq.sort,
+    page: lq.page,
+    view: lq.view,
+  };
+}
+
 export default async function AdminDeskPage({
   searchParams,
 }: {
@@ -136,9 +146,9 @@ export default async function AdminDeskPage({
 }) {
   const gate = await getCrmDbGate();
   const lq = listQueryFromSearchParams(searchParams);
+  const navQuery = deskNavQuery(lq);
   const q = lq.q;
   const status = lq.status;
-  const wp = lq.wp;
   const sort = parseSort(lq.sort);
   const page = parsePage(lq.page);
   const view = parseDeskView(lq.view);
@@ -188,8 +198,8 @@ export default async function AdminDeskPage({
   } else {
     const where =
       view === "leads" && gate.state === "ok"
-        ? deskLeadsWhere(q, status, wp)
-        : contactDirectoryWhere(q, status, wp);
+        ? deskLeadsWhere(q, status, undefined)
+        : contactDirectoryWhere(q, status, undefined);
 
     total = await prisma.crmContact.count({ where });
     const pages = totalPages(total);
@@ -212,7 +222,7 @@ export default async function AdminDeskPage({
   const pages = totalPages(total);
   const safePage = Math.min(Math.max(1, page), pages);
 
-  const chipBase = { q, sort, wp, view };
+  const chipBase = { q, sort, view };
   const chips =
     view === "clients"
       ? []
@@ -238,7 +248,6 @@ export default async function AdminDeskPage({
   const exportParams = new URLSearchParams();
   if (q) exportParams.set("q", q);
   if (status) exportParams.set("status", status);
-  if (wp) exportParams.set("wp", wp);
   const exportQs = exportParams.toString();
   const exportHref =
     view === "clients"
@@ -253,39 +262,41 @@ export default async function AdminDeskPage({
         : "Every contact row";
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-5 md:space-y-6">
       <CrmPageHeader
         title="Desk"
-        description={`${viewLabel}. Tap a row to open details, change desk or site stage, or convert a lead. Showing ${rows.length} of ${total} (page ${safePage} of ${pages}).`}
+        className="mb-5 pb-4 md:mb-6"
+        description={`${viewLabel}. Expand a row for full detail and to change stage or convert. ${rows.length} of ${total} on this page (${safePage} / ${pages}).`}
       />
 
-      <DeskViewLinks current={lq} />
-
-      <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/40 p-4 shadow-inner md:p-5">
-        <Suspense fallback={<SearchFallback />}>
-          <SearchForm placeholder="Search name, email, company, city…" />
-        </Suspense>
-      </div>
-
-      <ListToolbar
-        listPath={LIST_PATH}
-        exportHref={exportHref}
-        current={lq}
-        sort={sort}
-      >
-        {view === "clients" ? null : (
-          <WebsitePipelineFilterSelect listPath={LIST_PATH} current={lq} />
-        )}
-      </ListToolbar>
-
-      {chips.length > 0 ? (
-        <div>
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-            Desk status
-          </p>
-          <FilterChips chips={chips} />
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+        <div className="w-full shrink-0 lg:max-w-sm">
+          <DeskViewLinks current={navQuery} />
         </div>
-      ) : null}
+        <div className="min-w-0 flex-1 space-y-4">
+          <div className="rounded-xl border border-zinc-200/70 bg-zinc-50/50 p-3 md:p-4">
+            <Suspense fallback={<SearchFallback />}>
+              <SearchForm placeholder="Search name, email, company, city…" />
+            </Suspense>
+          </div>
+
+          <ListToolbar
+            listPath={LIST_PATH}
+            exportHref={exportHref}
+            current={navQuery}
+            sort={sort}
+          />
+
+          {chips.length > 0 ? (
+            <div className="rounded-xl border border-zinc-200/60 bg-white/60 px-2 py-3 md:px-3">
+              <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                Stage
+              </p>
+              <FilterChips chips={chips} />
+            </div>
+          ) : null}
+        </div>
+      </div>
 
       <DeskUnifiedRows
         rows={rows}
@@ -295,25 +306,25 @@ export default async function AdminDeskPage({
 
       <PaginationBar
         listPath={LIST_PATH}
-        current={lq}
+        current={navQuery}
         page={safePage}
         totalPages={pages}
       />
 
-      <p className="text-center text-xs text-zinc-500 md:text-left">
-        Job applications:{" "}
-        <Link href="/admin/applicants" className="font-semibold text-amber-800">
-          Applications
+      <div className="flex flex-col gap-2 border-t border-zinc-200/80 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+        <Link
+          href="/admin/applicants"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-zinc-100 px-4 text-sm font-semibold text-zinc-900 ring-1 ring-zinc-200/80 transition hover:bg-zinc-50"
+        >
+          Job applications
         </Link>
-        {" · "}
-        Resume uploads:{" "}
         <Link
           href="/admin/candidates"
-          className="font-semibold text-amber-800"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-zinc-100 px-4 text-sm font-semibold text-zinc-900 ring-1 ring-zinc-200/80 transition hover:bg-zinc-50"
         >
           Resume submissions
         </Link>
-      </p>
+      </div>
     </div>
   );
 }

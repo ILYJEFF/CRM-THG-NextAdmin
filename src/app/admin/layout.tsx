@@ -64,9 +64,9 @@ export default async function AdminLayout({
           className="flex-1 overflow-y-auto pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-10"
           id="crm-main"
         >
-          <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-5 sm:py-7 md:px-8 md:py-10">
+          <div className="w-full px-3 pb-6 pt-3 sm:px-4 sm:pb-8 sm:pt-5 md:px-6 lg:px-8 lg:pb-10 lg:pt-6">
             <CrmSchemaBanner gate={gate} />
-            <div className="rounded-[1.75rem] border border-zinc-200/70 bg-white/[0.92] p-5 shadow-[0_16px_48px_-20px_rgba(15,20,25,0.18)] ring-1 ring-zinc-950/[0.04] backdrop-blur-sm sm:p-6 md:p-8 md:px-10">
+            <div className="min-h-[calc(100dvh-6rem)] w-full rounded-xl border border-zinc-200/70 bg-white/[0.95] p-4 shadow-sm ring-1 ring-zinc-950/[0.03] sm:rounded-2xl sm:p-6 md:min-h-0 md:p-8">
               {children}
             </div>
           </div>

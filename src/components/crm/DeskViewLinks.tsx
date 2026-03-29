@@ -11,8 +11,8 @@ export function DeskViewLinks({ current }: { current: ListQueryBase }) {
   const base: Record<string, string | undefined> = {
     q: current.q,
     status: current.status,
-    wp: current.wp,
     sort: current.sort,
+    view: current.view,
   };
 
   const views = [
@@ -22,17 +22,17 @@ export function DeskViewLinks({ current }: { current: ListQueryBase }) {
   ];
 
   return (
-    <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-3 sm:p-4">
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+    <div className="w-full">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
         View
       </p>
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+      <div className="grid grid-cols-3 gap-1 rounded-xl bg-zinc-100/90 p-1 ring-1 ring-zinc-200/70">
         {views.map((v) => {
           const href =
             v.id === "clients"
               ? `/admin${buildListSearchParams(
                   { ...base, view: v.id },
-                  { page: null, status: null, wp: null }
+                  { page: null, status: null }
                 )}`
               : `/admin${buildListSearchParams(
                   { ...base, view: v.id },
@@ -44,10 +44,10 @@ export function DeskViewLinks({ current }: { current: ListQueryBase }) {
               href={href}
               scroll={false}
               className={cn(
-                "inline-flex min-h-12 flex-1 items-center justify-center rounded-full px-5 text-sm font-semibold transition sm:min-w-[7rem] sm:flex-none",
+                "flex min-h-11 items-center justify-center rounded-lg px-2 text-center text-sm font-semibold transition",
                 active === v.id
-                  ? "bg-[#0f1419] text-white shadow-md"
-                  : "bg-white text-zinc-700 ring-1 ring-zinc-200 hover:bg-zinc-50"
+                  ? "bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200/80"
+                  : "text-zinc-600 hover:text-zinc-900"
               )}
             >
               {v.label}

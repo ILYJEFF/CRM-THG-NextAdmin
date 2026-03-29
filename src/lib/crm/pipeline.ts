@@ -37,6 +37,26 @@ export function normalizeMarketingPipelineStage(raw: string): string {
     : "inbox";
 }
 
+/**
+ * When the desk uses a single "stage" control, keep `pipelineStage` aligned
+ * with `status` so marketing spreadsheet and CRM stay in sync.
+ */
+export function deskStatusToSyncedPipelineStage(deskStatus: string): string {
+  const k = deskStatus.trim().toLowerCase();
+  const map: Record<string, string> = {
+    new: "inbox",
+    contacted: "contacted",
+    qualified: "qualified",
+    proposal: "proposal",
+    won: "closed_won",
+    lost: "closed_lost",
+    archived: "on_hold",
+    converted: "negotiation",
+    deleted: "closed_lost",
+  };
+  return map[k] ?? "inbox";
+}
+
 /** Client inquiry pipeline (employers / hiring leads from the site) */
 export const CLIENT_LEAD_STATUSES = [
   { value: "new", label: "New" },

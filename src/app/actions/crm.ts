@@ -11,6 +11,7 @@ import {
   normalizeTalentStatus,
   normalizeSubmissionStage,
   normalizeActivityType,
+  deskStatusToSyncedPipelineStage,
 } from "@/lib/crm/pipeline";
 import { getCrmSessionUser } from "@/lib/crm/auth-crm";
 import { syncJobOrderToMarketing } from "@/lib/crm/marketing-career-sync";
@@ -55,6 +56,33 @@ export async function updateContactMarketingPipelineStage(
       return;
     }
     throw e;
+  }
+  revalidatePath("/admin");
+}
+
+/** Single desk control: updates both `status` and `pipelineStage` together. */
+export async function updateContactDeskStage(id: string, status: string) {
+  const s = normalizeClientStatus(status.trim() || "new");
+  const pipelineStage = normalizeMarketingPipelineStage(
+    deskStatusToSyncedPipelineStage(s)
+  );
+  try {
+    await prisma.crmContact.update({
+      where: { id },
+      data: { status: s, pipelineStage },
+    });
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2022"
+    ) {
+      await prisma.crmContact.update({
+        where: { id },
+        data: { status: s },
+      });
+    } else {
+      throw e;
+    }
   }
   revalidatePath("/admin");
 }

@@ -17,7 +17,6 @@ export function PaginationBar({
   const base: ListQueryBase = {
     q: current.q,
     status: current.status,
-    wp: current.wp,
     sort: current.sort,
     view: current.view,
   };

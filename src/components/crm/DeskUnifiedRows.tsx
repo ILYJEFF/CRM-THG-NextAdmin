@@ -2,13 +2,9 @@
 
 import { Fragment, useState } from "react";
 import { formatCrm } from "@/lib/crm/datetime";
-import {
-  formatMarketingPipelineStageLabel,
-  formatStatusLabel,
-} from "@/lib/crm/pipeline";
+import { formatStatusLabel } from "@/lib/crm/pipeline";
 import { StatusBadge } from "@/components/crm/StatusBadge";
-import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
-import { ContactWebsitePipelineSelect } from "@/components/crm/ContactWebsitePipelineSelect";
+import { ContactUnifiedStageSelect } from "@/components/crm/ContactUnifiedStageSelect";
 import { ClientInternalNotesForm } from "@/components/crm/ClientInternalNotesForm";
 import { ConvertLeadButton } from "@/components/crm/ConvertLeadButton";
 import { cn } from "@/lib/cn";
@@ -149,13 +145,7 @@ function LeadDetail({
           notes.
         </p>
       ) : null}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ContactStatusSelect id={row.contactId} current={row.status} />
-        <ContactWebsitePipelineSelect
-          id={row.contactId}
-          current={row.pipelineStage}
-        />
-      </div>
+      <ContactUnifiedStageSelect id={row.contactId} current={row.status} />
       {showConvert && !row.clientId ? (
         <ConvertLeadButton contactId={row.contactId} />
       ) : null}
@@ -276,14 +266,11 @@ export function DeskUnifiedRows({
                       {formatCrm(row.createdAt, "MMM d, yyyy")}
                     </p>
                     {row.variant === "lead" ? (
-                      <div className="mt-2 flex flex-wrap gap-2">
+                      <div className="mt-2">
                         <StatusBadge
                           status={row.status}
                           label={formatStatusLabel(row.status, "client")}
                         />
-                        <span className="inline-flex items-center rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-semibold text-violet-900 ring-1 ring-violet-200/80">
-                          {formatMarketingPipelineStageLabel(row.pipelineStage)}
-                        </span>
                       </div>
                     ) : null}
                   </div>
@@ -322,7 +309,7 @@ export function DeskUnifiedRows({
                   Market
                 </th>
                 <th className="min-w-[120px] px-3 py-3.5 font-semibold text-zinc-700">
-                  Desk / stage
+                  Stage
                 </th>
               </tr>
             </thead>
@@ -400,17 +387,10 @@ export function DeskUnifiedRows({
                         </td>
                         <td className="px-3 py-3 align-top">
                           {row.variant === "lead" ? (
-                            <div className="flex flex-col gap-1.5">
-                              <StatusBadge
-                                status={row.status}
-                                label={formatStatusLabel(row.status, "client")}
-                              />
-                              <span className="text-[10px] font-semibold uppercase tracking-wide text-violet-800">
-                                {formatMarketingPipelineStageLabel(
-                                  row.pipelineStage
-                                )}
-                              </span>
-                            </div>
+                            <StatusBadge
+                              status={row.status}
+                              label={formatStatusLabel(row.status, "client")}
+                            />
                           ) : (
                             <span className="text-xs text-zinc-500">
                               Account
