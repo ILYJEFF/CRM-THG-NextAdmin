@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { LEAD_LIST_EXCLUDED_STATUSES } from "@/lib/crm/pipeline";
 
 export function buildListSearchParams(
   current: Record<string, string | undefined>,
@@ -33,6 +34,10 @@ export function contactWhere(
   }
   if (status?.trim()) {
     parts.push({ status: status.trim() });
+  } else {
+    parts.push({
+      status: { notIn: [...LEAD_LIST_EXCLUDED_STATUSES] },
+    });
   }
   if (parts.length === 0) return {};
   if (parts.length === 1) return parts[0];

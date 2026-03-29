@@ -69,7 +69,7 @@ export function LeadDangerZone({
         {hasClient && clientId ? (
           <button
             type="button"
-            onClick={() => router.push(`/admin/clients/${clientId}`)}
+            onClick={() => router.replace(`/admin/clients/${clientId}`)}
             className="inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 sm:flex-initial"
           >
             Open client profile
@@ -83,8 +83,7 @@ export function LeadDangerZone({
               startTransition(async () => {
                 const r = await convertContactToClient(contactId);
                 if (r.ok) {
-                  router.push(`/admin/clients/${r.clientId}`);
-                  router.refresh();
+                  router.replace(`/admin/clients/${r.clientId}`);
                 } else {
                   setMessage(r.error);
                 }

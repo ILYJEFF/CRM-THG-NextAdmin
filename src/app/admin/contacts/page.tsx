@@ -27,6 +27,8 @@ import {
 } from "@/lib/crm/crm-contact-select";
 import { loadContactJobDescriptionUrlMap } from "@/lib/crm/contact-job-description-url";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
+import { ClickableTableRow } from "@/components/crm/ClickableTableRow";
+import { JdTableCell } from "@/components/crm/JdTableCell";
 
 export const dynamic = "force-dynamic";
 
@@ -91,7 +93,7 @@ export default async function ContactsPage({
   const chips = [
     {
       href: `${LIST_PATH}${buildListSearchParams(chipBase, { status: null, page: null })}`,
-      label: "All",
+      label: "Open",
       active: !status,
     },
     ...CLIENT_LEAD_STATUSES.map((s) => ({
@@ -229,9 +231,9 @@ export default async function ContactsPage({
                 contacts.map((c) => {
                   const jdHref = marketingAssetUrl(jdMap.get(c.id) ?? null);
                   return (
-                  <tr
+                  <ClickableTableRow
                     key={c.id}
-                    className="transition hover:bg-amber-50/40"
+                    href={`/admin/contacts/${c.id}`}
                   >
                     <td className="whitespace-nowrap px-4 py-3 align-top text-zinc-600">
                       {format(c.createdAt, "MMM d, yyyy")}
@@ -240,12 +242,9 @@ export default async function ContactsPage({
                       </span>
                     </td>
                     <td className="px-4 py-3 align-top">
-                      <Link
-                        href={`/admin/contacts/${c.id}`}
-                        className="font-medium text-zinc-900 hover:text-amber-900 hover:underline"
-                      >
+                      <span className="font-medium text-zinc-900">
                         {c.contactName}
-                      </Link>
+                      </span>
                       {c.companyName ? (
                         <span className="mt-0.5 block text-xs text-zinc-500">
                           {c.companyName}
@@ -263,27 +262,14 @@ export default async function ContactsPage({
                         {c.message}
                       </p>
                     </td>
-                    <td className="px-4 py-3 align-top">
-                      {jdHref ? (
-                        <a
-                          href={jdHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm font-semibold text-emerald-800 hover:underline"
-                        >
-                          Open
-                        </a>
-                      ) : (
-                        <span className="text-zinc-400">—</span>
-                      )}
-                    </td>
+                    <JdTableCell href={jdHref} />
                     <td className="px-4 py-3 align-top">
                       <StatusBadge
                         status={c.status}
                         label={formatStatusLabel(c.status, "client")}
                       />
                     </td>
-                  </tr>
+                  </ClickableTableRow>
                 );
                 })
               )}

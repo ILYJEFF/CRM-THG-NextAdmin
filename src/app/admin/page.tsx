@@ -4,9 +4,10 @@ import { format } from "date-fns";
 import { StatusBadge } from "@/components/crm/StatusBadge";
 import {
   formatStatusLabel,
-  CLIENT_LEAD_STATUSES,
+  CLIENT_LEAD_DESK_PIPELINE,
   TALENT_STATUSES,
 } from "@/lib/crm/pipeline";
+import { contactWhere } from "@/lib/crm/list-query";
 import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
 import {
   crmContactScalarSelect,
@@ -51,7 +52,9 @@ export default async function AdminHomePage() {
     recentCandidates,
     companyNameRows,
   ] = await Promise.all([
-    prisma.crmContact.count(),
+    prisma.crmContact.count({
+      where: contactWhere(undefined, undefined),
+    }),
     gate.state === "ok" ? prisma.crmClient.count() : Promise.resolve(0),
     gate.state === "ok" ? prisma.crmJobOrder.count() : Promise.resolve(0),
     prisma.crmCandidate.count(),
@@ -66,6 +69,7 @@ export default async function AdminHomePage() {
       _count: true,
     }),
     prisma.crmContact.findMany({
+      where: contactWhere(undefined, undefined),
       select: contactSelect,
       orderBy: { createdAt: "desc" },
       take: 5,
@@ -76,7 +80,12 @@ export default async function AdminHomePage() {
       take: 5,
     }),
     prisma.crmContact.findMany({
-      where: { companyName: { not: null } },
+      where: {
+        AND: [
+          { companyName: { not: null } },
+          contactWhere(undefined, undefined),
+        ],
+      },
       select: { companyName: true },
     }),
   ]);
@@ -190,7 +199,7 @@ export default async function AdminHomePage() {
         </Link>
         <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            All client leads
+            Open client leads
           </p>
           <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
             {contactTotal}
@@ -229,17 +238,17 @@ export default async function AdminHomePage() {
           {uniqueEmployers}
         </p>
         <p className="mt-2 text-sm font-medium text-amber-800">
-          Distinct companies on leads →
+          Distinct companies on open leads →
         </p>
       </Link>
 
       <div className="grid gap-8 lg:grid-cols-2">
         <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-zinc-900">
-            Client lead pipeline
+            Open lead pipeline
           </h2>
           <ul className="mt-4 flex flex-wrap gap-2">
-            {CLIENT_LEAD_STATUSES.map((s) => {
+            {CLIENT_LEAD_DESK_PIPELINE.map((s) => {
               const n = contactPipeline[s.value] ?? 0;
               return (
                 <li key={s.value}>
@@ -321,7 +330,7 @@ export default async function AdminHomePage() {
         <section>
           <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-zinc-900">
-              Latest lead submissions
+              Latest open leads
             </h2>
             <Link
               href="/admin/contacts"
@@ -333,7 +342,7 @@ export default async function AdminHomePage() {
           <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm">
             {recentContacts.length === 0 ? (
               <li className="px-4 py-10 text-center text-sm text-zinc-500">
-                No client leads yet.
+                No open client leads yet.
               </li>
             ) : (
               recentContacts.map((c) => (

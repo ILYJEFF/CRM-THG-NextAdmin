@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
+import { contactWhere } from "@/lib/crm/list-query";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,12 @@ export default async function CompaniesPage() {
   }
 
   const rows = await prisma.crmContact.findMany({
-    where: { companyName: { not: null } },
+    where: {
+      AND: [
+        { companyName: { not: null } },
+        contactWhere(undefined, undefined),
+      ],
+    },
     select: { companyName: true },
   });
 
@@ -40,8 +46,8 @@ export default async function CompaniesPage() {
           Company accounts
         </h1>
         <p className="mt-2 text-sm text-zinc-600">
-          Grouped from client lead forms that included a company name. Tap a
-          row to search leads for that employer.
+          Grouped from open client lead forms that included a company name. Tap
+          a row to search leads for that employer.
         </p>
       </div>
 

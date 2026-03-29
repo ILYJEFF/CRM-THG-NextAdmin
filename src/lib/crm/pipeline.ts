@@ -11,6 +11,14 @@ export const CLIENT_LEAD_STATUSES = [
   { value: "deleted", label: "Deleted" },
 ] as const;
 
+/** Desk pipeline chips only: converted accounts live under Active clients */
+export const CLIENT_LEAD_DESK_PIPELINE = CLIENT_LEAD_STATUSES.filter(
+  (s) => s.value !== "converted" && s.value !== "deleted"
+);
+
+/** Default leads list excludes these (use Active clients / filters to find them) */
+export const LEAD_LIST_EXCLUDED_STATUSES = ["converted", "deleted"] as const;
+
 /** Job orders (placements / searches) under an active client */
 export const JOB_ORDER_STATUSES = [
   { value: "open", label: "Open" },
