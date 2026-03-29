@@ -59,6 +59,19 @@ export const jobApplicationIngestSchema = z.object({
   updatedAt: isoDateString,
 });
 
+export const marketingOptInIngestSchema = z.object({
+  id: z.string().min(1),
+  contactName: z.string().min(1),
+  phone: z.string().min(1),
+  email: z.string().email(),
+  companyName: z.string().nullable().optional(),
+  jobTitle: z.string().nullable().optional(),
+  city: z.string().min(1),
+  createdAt: isoDateString,
+  updatedAt: isoDateString,
+});
+
 export type ContactIngest = z.infer<typeof contactIngestSchema>;
+export type MarketingOptInIngest = z.infer<typeof marketingOptInIngestSchema>;
 export type CandidateIngest = z.infer<typeof candidateIngestSchema>;
 export type JobApplicationIngest = z.infer<typeof jobApplicationIngestSchema>;

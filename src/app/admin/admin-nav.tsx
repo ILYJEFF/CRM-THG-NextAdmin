@@ -35,6 +35,7 @@ export function AdminNav() {
       <NavLink href="/admin">Desk</NavLink>
       <NavLink href="/admin/applicants">Applications</NavLink>
       <NavLink href="/admin/candidates">Resume submissions</NavLink>
+      <NavLink href="/admin/agreed-to-marketing">Agreed to marketing</NavLink>
     </div>
   );
 }
