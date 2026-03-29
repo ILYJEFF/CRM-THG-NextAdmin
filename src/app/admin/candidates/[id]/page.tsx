@@ -9,6 +9,8 @@ import { marketingResumeUrl } from "@/lib/crm/links";
 import { MarketingDocumentCard } from "@/components/crm/MarketingDocumentCard";
 import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
 import { loadCandidateNotes } from "@/lib/crm/candidate-notes";
+import { getSubmissionsModuleReady } from "@/lib/crm/submissions-module";
+import { CandidateJobAssignments } from "@/components/crm/CandidateJobAssignments";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,47 @@ export default async function CandidateDetailPage({
   const notes = await loadCandidateNotes(id);
 
   const resumeHref = marketingResumeUrl(c.resumeUrl);
+
+  const submissionsReady = await getSubmissionsModuleReady();
+  const [submissions, jobPickerRows] = submissionsReady
+    ? await Promise.all([
+        prisma.crmSubmission.findMany({
+          where: { candidateId: id },
+          include: {
+            jobOrder: {
+              select: {
+                id: true,
+                clientId: true,
+                title: true,
+                client: {
+                  select: { companyName: true, contactName: true },
+                },
+              },
+            },
+          },
+          orderBy: { updatedAt: "desc" },
+        }),
+        prisma.crmJobOrder.findMany({
+          where: {
+            status: { notIn: ["closed", "filled"] },
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 150,
+          select: {
+            id: true,
+            title: true,
+            client: {
+              select: { companyName: true, contactName: true },
+            },
+          },
+        }),
+      ])
+    : [[], []];
+
+  const jobOptions = jobPickerRows.map((j) => ({
+    id: j.id,
+    label: `${j.title} · ${j.client.companyName || j.client.contactName}`,
+  }));
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 md:max-w-3xl">
@@ -149,6 +192,29 @@ export default async function CandidateDetailPage({
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
         <CandidateNotesForm id={c.id} initial={notes} />
       </section>
+
+      {submissionsReady ? (
+        <CandidateJobAssignments
+          candidateId={c.id}
+          submissions={submissions}
+          jobOptions={jobOptions}
+        />
+      ) : (
+        <section className="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-5 text-sm text-amber-950">
+          <p className="font-semibold">Candidate–job matching</p>
+          <p className="mt-2 leading-relaxed text-amber-900/90">
+            Run{" "}
+            <code className="rounded bg-amber-100/80 px-1 py-0.5 text-xs">
+              prisma/sql/add_career_submissions.sql
+            </code>{" "}
+            (or{" "}
+            <code className="rounded bg-amber-100/80 px-1 py-0.5 text-xs">
+              npx prisma db push
+            </code>
+            ) to enable assigning talent to specific job orders.
+          </p>
+        </section>
+      )}
 
       <p className="px-1 text-center text-xs text-zinc-400">
         Applied {format(c.createdAt, "MMMM d, yyyy 'at' h:mm a")}

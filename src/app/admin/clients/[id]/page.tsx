@@ -11,6 +11,7 @@ import { JobOrderStatusSelect } from "@/components/crm/JobOrderStatusSelect";
 import { isCrmS3Configured } from "@/lib/crm/s3-contracts";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 import { ClientsModulePlaceholder } from "@/components/crm/ClientsModulePlaceholder";
+import { JobOrderCareerPanel } from "@/components/crm/JobOrderCareerPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,10 @@ export default async function ClientDetailPage({
   });
 
   const uploadEnabled = isCrmS3Configured();
+  const marketingBase = (
+    process.env.NEXT_PUBLIC_MARKETING_URL || "https://www.thehammittgroup.com"
+  ).replace(/\/$/, "");
+
   const contractRows = client.contracts.map((c) => ({
     id: c.id,
     label: c.label,
@@ -178,6 +183,7 @@ export default async function ClientDetailPage({
             client.jobOrders.map((j) => (
               <article
                 key={j.id}
+                id={`job-${j.id}`}
                 className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -215,6 +221,24 @@ export default async function ClientDetailPage({
                     <JobOrderPrioritySelect id={j.id} current={j.priority} />
                   </div>
                 </div>
+                <JobOrderCareerPanel
+                  jobOrderId={j.id}
+                  marketingBaseUrl={marketingBase}
+                  initial={{
+                    publicDescription: j.publicDescription,
+                    publicLocation: j.publicLocation,
+                    publicEmploymentType: j.publicEmploymentType,
+                    publicCompanyName: j.publicCompanyName,
+                    responsibilities: j.responsibilities,
+                    requirements: j.requirements,
+                    salaryMin: j.salaryMin,
+                    salaryMax: j.salaryMax,
+                    salaryPeriod: j.salaryPeriod,
+                    careerSlug: j.careerSlug,
+                    careerPublishedAt: j.careerPublishedAt?.toISOString() ?? null,
+                    careerLastError: j.careerLastError,
+                  }}
+                />
               </article>
             ))
           )}

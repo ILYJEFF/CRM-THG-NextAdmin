@@ -40,6 +40,17 @@ export const TALENT_STATUSES = [
   { value: "archived", label: "Archived" },
 ] as const;
 
+/** Candidate matched to a specific client job order */
+export const SUBMISSION_STAGES = [
+  { value: "triage", label: "Triage" },
+  { value: "shortlist", label: "Shortlist" },
+  { value: "submitted_client", label: "Submitted to client" },
+  { value: "interview", label: "Interview" },
+  { value: "offer", label: "Offer" },
+  { value: "placed", label: "Placed" },
+  { value: "closed", label: "Closed" },
+] as const;
+
 export type ClientLeadStatus = (typeof CLIENT_LEAD_STATUSES)[number]["value"];
 export type TalentStatus = (typeof TALENT_STATUSES)[number]["value"];
 
@@ -84,6 +95,15 @@ export function jobOrderStatusBadgeClass(status: string): string {
 export function formatJobOrderStatusLabel(status: string): string {
   const found = JOB_ORDER_STATUSES.find((x) => x.value === status);
   return found?.label ?? status;
+}
+
+export function formatSubmissionStageLabel(stage: string): string {
+  const found = SUBMISSION_STAGES.find((x) => x.value === stage);
+  return found?.label ?? stage;
+}
+
+export function normalizeSubmissionStage(stage: string): string {
+  return (stage.trim() || "triage").slice(0, 64);
 }
 
 export function formatStatusLabel(

@@ -6,7 +6,9 @@ import { z } from "zod";
 import {
   normalizeClientStatus,
   normalizeTalentStatus,
+  normalizeSubmissionStage,
 } from "@/lib/crm/pipeline";
+import { syncJobOrderToMarketing } from "@/lib/crm/marketing-career-sync";
 
 export async function updateContactStatus(id: string, status: string) {
   const s = normalizeClientStatus(status.trim() || "new");
@@ -200,6 +202,7 @@ export async function createJobOrder(
     });
     revalidatePath(`/admin/clients/${clientId}`);
     revalidatePath("/admin/clients");
+    revalidatePath("/admin/jobs");
     return { ok: true, id: row.id };
   } catch (e) {
     console.error("[createJobOrder]", e);
@@ -220,6 +223,7 @@ export async function updateJobOrderStatus(id: string, status: string) {
   });
   revalidatePath(`/admin/clients/${row.clientId}`);
   revalidatePath("/admin/clients");
+  revalidatePath("/admin/jobs");
 }
 
 export async function updateJobOrderPriority(id: string, priority: string) {
@@ -231,6 +235,7 @@ export async function updateJobOrderPriority(id: string, priority: string) {
   });
   revalidatePath(`/admin/clients/${row.clientId}`);
   revalidatePath("/admin/clients");
+  revalidatePath("/admin/jobs");
 }
 
 export async function deleteJobOrder(
@@ -245,6 +250,7 @@ export async function deleteJobOrder(
     await prisma.crmJobOrder.delete({ where: { id } });
     revalidatePath(`/admin/clients/${row.clientId}`);
     revalidatePath("/admin/clients");
+    revalidatePath("/admin/jobs");
     return { ok: true };
   } catch (e) {
     return {
@@ -310,6 +316,243 @@ export async function deleteClientContract(
     return {
       ok: false,
       error: e instanceof Error ? e.message : "Could not delete.",
+    };
+  }
+}
+
+const careerDraftSchema = z.object({
+  publicDescription: z.string().max(120_000).optional(),
+  publicLocation: z.string().max(200).optional(),
+  publicEmploymentType: z
+    .enum(["FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERN"])
+    .optional(),
+  publicCompanyName: z.string().max(200).optional(),
+  responsibilities: z.string().max(120_000).optional(),
+  requirements: z.string().max(120_000).optional(),
+  salaryMin: z.coerce.number().int().positive().optional().nullable(),
+  salaryMax: z.coerce.number().int().positive().optional().nullable(),
+  salaryPeriod: z.enum(["YEARLY", "MONTHLY", "HOURLY"]).optional().nullable(),
+});
+
+export async function saveJobOrderCareerDraft(
+  jobOrderId: string,
+  raw: Record<string, unknown>
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const parsed = careerDraftSchema.safeParse(raw);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid fields",
+    };
+  }
+  const p = parsed.data;
+  try {
+    const row = await prisma.crmJobOrder.update({
+      where: { id: jobOrderId },
+      data: {
+        publicDescription: p.publicDescription?.trim() || null,
+        publicLocation: p.publicLocation?.trim() || null,
+        publicEmploymentType: p.publicEmploymentType ?? "FULL_TIME",
+        publicCompanyName: p.publicCompanyName?.trim() || null,
+        responsibilities: p.responsibilities?.trim() || null,
+        requirements: p.requirements?.trim() || null,
+        salaryMin: p.salaryMin ?? null,
+        salaryMax: p.salaryMax ?? null,
+        salaryPeriod: p.salaryPeriod ?? null,
+      },
+      select: { clientId: true },
+    });
+    revalidatePath(`/admin/clients/${row.clientId}`);
+    revalidatePath("/admin/jobs");
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Could not save posting fields.",
+    };
+  }
+}
+
+function mapEmploymentType(
+  s: string | null | undefined
+):
+  | "FULL_TIME"
+  | "PART_TIME"
+  | "CONTRACT"
+  | "TEMPORARY"
+  | "INTERN" {
+  const u = (s || "FULL_TIME").toUpperCase().replace(/-/g, "_");
+  if (
+    u === "FULL_TIME" ||
+    u === "PART_TIME" ||
+    u === "CONTRACT" ||
+    u === "TEMPORARY" ||
+    u === "INTERN"
+  ) {
+    return u;
+  }
+  return "FULL_TIME";
+}
+
+export async function syncJobOrderCareerPosting(
+  jobOrderId: string,
+  published: boolean
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const job = await prisma.crmJobOrder.findUnique({
+    where: { id: jobOrderId },
+    include: { client: true },
+  });
+  if (!job) return { ok: false, error: "Job order not found." };
+
+  const description = (
+    job.publicDescription ||
+    job.roleSummary ||
+    ""
+  ).trim();
+  const bodyDescription =
+    description ||
+    `We are recruiting for ${job.title}. Details will be shared with qualified applicants.`;
+
+  const location = (
+    job.publicLocation ||
+    job.client.city ||
+    "United States"
+  ).trim();
+
+  const companyName =
+    job.publicCompanyName?.trim() ||
+    job.client.companyName?.trim() ||
+    job.client.contactName;
+
+  const salaryPeriod =
+    job.salaryPeriod === "YEARLY" ||
+    job.salaryPeriod === "MONTHLY" ||
+    job.salaryPeriod === "HOURLY"
+      ? job.salaryPeriod
+      : null;
+
+  const result = await syncJobOrderToMarketing({
+    jobOrderId: job.id,
+    title: job.title,
+    description: bodyDescription,
+    location,
+    employmentType: mapEmploymentType(job.publicEmploymentType),
+    companyName,
+    industry: job.client.industry ?? undefined,
+    responsibilities: job.responsibilities ?? undefined,
+    requirements: job.requirements ?? undefined,
+    salaryMin: job.salaryMin ?? null,
+    salaryMax: job.salaryMax ?? null,
+    salaryPeriod,
+    published,
+  });
+
+  const now = new Date();
+  if (!result.ok) {
+    await prisma.crmJobOrder.update({
+      where: { id: jobOrderId },
+      data: { careerLastSyncAt: now, careerLastError: result.error },
+    });
+    revalidatePath(`/admin/clients/${job.clientId}`);
+    revalidatePath("/admin/jobs");
+    return result;
+  }
+
+  await prisma.crmJobOrder.update({
+    where: { id: jobOrderId },
+    data: {
+      careerPostingId: result.postingId,
+      careerSlug: result.slug,
+      careerPublishedAt: published ? now : null,
+      careerLastSyncAt: now,
+      careerLastError: null,
+    },
+  });
+  revalidatePath(`/admin/clients/${job.clientId}`);
+  revalidatePath("/admin/jobs");
+  return { ok: true };
+}
+
+export async function assignCandidateToJobOrder(
+  candidateId: string,
+  jobOrderId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await prisma.crmSubmission.create({
+      data: {
+        candidateId,
+        jobOrderId,
+        stage: "triage",
+      },
+    });
+  } catch (e: unknown) {
+    const code =
+      typeof e === "object" && e !== null && "code" in e
+        ? String((e as { code: string }).code)
+        : "";
+    if (code === "P2002") {
+      return { ok: false, error: "This candidate is already on that job order." };
+    }
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Could not assign.",
+    };
+  }
+  revalidatePath(`/admin/candidates/${candidateId}`);
+  revalidatePath("/admin/jobs");
+  revalidatePath("/admin/clients");
+  return { ok: true };
+}
+
+export async function updateSubmissionStage(
+  submissionId: string,
+  stage: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const s = normalizeSubmissionStage(stage);
+  try {
+    const row = await prisma.crmSubmission.update({
+      where: { id: submissionId },
+      data: { stage: s },
+      select: { candidateId: true, jobOrderId: true },
+    });
+    revalidatePath(`/admin/candidates/${row.candidateId}`);
+    revalidatePath("/admin/jobs");
+    const job = await prisma.crmJobOrder.findUnique({
+      where: { id: row.jobOrderId },
+      select: { clientId: true },
+    });
+    if (job) revalidatePath(`/admin/clients/${job.clientId}`);
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Could not update stage.",
+    };
+  }
+}
+
+export async function removeSubmission(
+  submissionId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const row = await prisma.crmSubmission.findUnique({
+      where: { id: submissionId },
+      select: { candidateId: true, jobOrderId: true },
+    });
+    if (!row) return { ok: false, error: "Not found." };
+    await prisma.crmSubmission.delete({ where: { id: submissionId } });
+    revalidatePath(`/admin/candidates/${row.candidateId}`);
+    revalidatePath("/admin/jobs");
+    const job = await prisma.crmJobOrder.findUnique({
+      where: { id: row.jobOrderId },
+      select: { clientId: true },
+    });
+    if (job) revalidatePath(`/admin/clients/${job.clientId}`);
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Could not remove.",
     };
   }
 }

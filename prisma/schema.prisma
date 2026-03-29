@@ -54,11 +54,48 @@ model CrmJobOrder {
   status       String    @default("open")
   priority     String    @default("normal")
   notes        String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+
+  /// Public opening copy (synced to thehammittgroup.com /openings)
+  publicDescription    String?  @db.Text
+  publicLocation       String?
+  publicEmploymentType String?  @default("FULL_TIME")
+  publicCompanyName    String?
+  responsibilities     String?  @db.Text
+  requirements       String?  @db.Text
+  salaryMin          Int?
+  salaryMax          Int?
+  salaryPeriod       String?
+
+  careerPostingId   String?
+  careerSlug        String?
+  careerPublishedAt DateTime?
+  careerLastSyncAt  DateTime?
+  careerLastError   String?
+
+  submissions CrmSubmission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([clientId])
   @@map("crm_job_orders")
+}
+
+model CrmSubmission {
+  id          String       @id @default(cuid())
+  candidateId String
+  candidate   CrmCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobOrderId  String
+  jobOrder    CrmJobOrder  @relation(fields: [jobOrderId], references: [id], onDelete: Cascade)
+  stage       String       @default("triage")
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([candidateId, jobOrderId])
+  @@index([jobOrderId])
+  @@index([candidateId])
+  @@map("crm_submissions")
 }
 
 model CrmClientContract {
@@ -91,6 +128,8 @@ model CrmCandidate {
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  submissions CrmSubmission[]
 
   @@map("crm_candidates")
 }
