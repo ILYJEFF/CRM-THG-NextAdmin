@@ -21,6 +21,9 @@ export async function GET() {
       checks: {
         databaseUrl,
         supabasePublic,
+        formIngestSecret: Boolean(
+          process.env.THG_FORM_INTEGRATION_SECRET?.trim()
+        ),
       },
     },
     { status: ok ? 200 : 503 }
