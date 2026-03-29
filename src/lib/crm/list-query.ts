@@ -29,6 +29,8 @@ export function contactWhere(
         { city: { contains: trimmed, mode: "insensitive" } },
         { phone: { contains: trimmed } },
         { message: { contains: trimmed, mode: "insensitive" } },
+        { openPositions: { contains: trimmed, mode: "insensitive" } },
+        { payBand: { contains: trimmed, mode: "insensitive" } },
       ],
     });
   }

@@ -12,6 +12,8 @@ export const contactIngestSchema = z.object({
   phone: z.string().min(1),
   city: z.string().min(1),
   industry: z.string().nullable().optional(),
+  openPositions: z.string().nullable().optional(),
+  payBand: z.string().nullable().optional(),
   message: z.string().min(1),
   jobDescriptionUrl: z.string().nullable().optional(),
   status: z.string().min(1),

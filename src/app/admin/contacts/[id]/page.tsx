@@ -145,6 +145,26 @@ export default async function ContactDetailPage({
               </dd>
             </div>
           ) : null}
+          {contact.openPositions ? (
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                Open positions
+              </dt>
+              <dd className="mt-1 whitespace-pre-wrap font-medium text-zinc-900">
+                {contact.openPositions}
+              </dd>
+            </div>
+          ) : null}
+          {contact.payBand ? (
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                Pay band
+              </dt>
+              <dd className="mt-1 font-medium text-zinc-900">
+                {contact.payBand}
+              </dd>
+            </div>
+          ) : null}
         </dl>
       </section>
 
