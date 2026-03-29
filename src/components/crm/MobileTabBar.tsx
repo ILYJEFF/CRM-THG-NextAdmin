@@ -23,12 +23,18 @@ const tabs = [
     match: (p: string) => p.startsWith("/admin/candidates"),
     icon: TalentIcon,
   },
+  {
+    href: "/admin/companies",
+    label: "Accounts",
+    match: (p: string) => p.startsWith("/admin/companies"),
+    icon: CompanyIcon,
+  },
 ];
 
 function DeskIcon({ active }: { active: boolean }) {
   return (
     <svg
-      className={cn("h-6 w-6", active ? "text-amber-400" : "text-zinc-500")}
+      className={cn("h-5 w-5", active ? "text-amber-400" : "text-zinc-500")}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -47,7 +53,7 @@ function DeskIcon({ active }: { active: boolean }) {
 function LeadsIcon({ active }: { active: boolean }) {
   return (
     <svg
-      className={cn("h-6 w-6", active ? "text-amber-400" : "text-zinc-500")}
+      className={cn("h-5 w-5", active ? "text-amber-400" : "text-zinc-500")}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -66,7 +72,7 @@ function LeadsIcon({ active }: { active: boolean }) {
 function TalentIcon({ active }: { active: boolean }) {
   return (
     <svg
-      className={cn("h-6 w-6", active ? "text-amber-400" : "text-zinc-500")}
+      className={cn("h-5 w-5", active ? "text-amber-400" : "text-zinc-500")}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -76,7 +82,26 @@ function TalentIcon({ active }: { active: boolean }) {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0-5a4 4 0 110 8 4 4 0 010-8zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      />
+    </svg>
+  );
+}
+
+function CompanyIcon({ active }: { active: boolean }) {
+  return (
+    <svg
+      className={cn("h-5 w-5", active ? "text-amber-400" : "text-zinc-500")}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
       />
     </svg>
   );
@@ -90,7 +115,7 @@ export function MobileTabBar() {
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800/90 bg-[#0c0f14]/95 backdrop-blur-md sm:hidden pb-[env(safe-area-inset-bottom,0px)]"
       aria-label="Primary"
     >
-      <ul className="mx-auto flex max-w-lg items-stretch justify-around gap-1 px-2 pt-1">
+      <ul className="mx-auto flex max-w-xl items-stretch justify-between gap-0.5 px-1 pt-1">
         {tabs.map((tab) => {
           const active = tab.match(pathname);
           return (
@@ -107,7 +132,7 @@ export function MobileTabBar() {
                 <tab.icon active={active} />
                 <span
                   className={cn(
-                    "max-w-full truncate px-1 text-[10px] font-semibold uppercase tracking-wide",
+                    "max-w-full truncate px-0.5 text-[9px] font-semibold uppercase tracking-wide",
                     active ? "text-amber-400" : "text-zinc-500"
                   )}
                 >

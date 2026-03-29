@@ -35,6 +35,7 @@ export function AdminNav() {
       <NavLink href="/admin">Recruiting desk</NavLink>
       <NavLink href="/admin/contacts">Client leads</NavLink>
       <NavLink href="/admin/candidates">Talent pipeline</NavLink>
+      <NavLink href="/admin/companies">Company accounts</NavLink>
     </>
   );
 }

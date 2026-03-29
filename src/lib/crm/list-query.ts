@@ -39,6 +39,29 @@ export function contactWhere(
   return { AND: parts };
 }
 
+/** Base query keys carried across list filters (pagination, sort, search). */
+export type ListQueryBase = {
+  q?: string;
+  status?: string;
+  sort?: string;
+  page?: string;
+};
+
+export function listQueryFromSearchParams(
+  sp: Record<string, string | string[] | undefined>
+): ListQueryBase {
+  const g = (k: string) => {
+    const v = sp[k];
+    return typeof v === "string" ? v : undefined;
+  };
+  return {
+    q: g("q"),
+    status: g("status"),
+    sort: g("sort"),
+    page: g("page"),
+  };
+}
+
 export function candidateWhere(
   q?: string | null,
   status?: string | null

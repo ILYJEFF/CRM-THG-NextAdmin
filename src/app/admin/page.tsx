@@ -20,6 +20,7 @@ export default async function AdminHomePage() {
     candidateGroups,
     recentContacts,
     recentCandidates,
+    companyNameRows,
   ] = await Promise.all([
     prisma.crmContact.count(),
     prisma.crmCandidate.count(),
@@ -41,7 +42,17 @@ export default async function AdminHomePage() {
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
+    prisma.crmContact.findMany({
+      where: { companyName: { not: null } },
+      select: { companyName: true },
+    }),
   ]);
+
+  const uniqueEmployers = new Set(
+    companyNameRows
+      .map((r) => r.companyName?.trim())
+      .filter((n): n is string => Boolean(n))
+  ).size;
 
   const contactPipeline = Object.fromEntries(
     contactGroups.map((g) => [g.status, g._count])
@@ -120,6 +131,21 @@ export default async function AdminHomePage() {
           </Link>
         </div>
       </section>
+
+      <Link
+        href="/admin/companies"
+        className="block rounded-2xl border border-zinc-200/90 bg-gradient-to-r from-white to-amber-50/40 p-5 shadow-sm transition active:scale-[0.99] hover:border-amber-300/80 hover:shadow-md md:inline-block md:min-w-[280px]"
+      >
+        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Employer accounts
+        </p>
+        <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
+          {uniqueEmployers}
+        </p>
+        <p className="mt-2 text-sm font-medium text-amber-800">
+          Distinct companies on leads →
+        </p>
+      </Link>
 
       <div className="grid gap-8 lg:grid-cols-2">
         <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">

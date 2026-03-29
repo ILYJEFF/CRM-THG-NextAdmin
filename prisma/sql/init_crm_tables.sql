@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS "crm_candidates" (
     "resumeUrl" TEXT,
     "coverLetter" TEXT,
     "status" TEXT NOT NULL DEFAULT 'new',
+    "notes" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "crm_candidates_pkey" PRIMARY KEY ("id")

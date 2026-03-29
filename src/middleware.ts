@@ -46,9 +46,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(login);
   }
 
+  if (pathname.startsWith("/api/crm/") && !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   return response;
 }
 
 export const config = {
-  matcher: ["/", "/admin/:path*", "/login"],
+  matcher: ["/", "/admin/:path*", "/login", "/api/crm/:path*"],
 };

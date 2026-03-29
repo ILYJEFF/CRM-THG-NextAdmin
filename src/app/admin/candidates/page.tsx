@@ -5,18 +5,33 @@ import { format } from "date-fns";
 import { FilterChips } from "@/components/crm/FilterChips";
 import { SearchForm } from "@/components/crm/SearchForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
+import { ListToolbar } from "@/components/crm/ListToolbar";
+import { PaginationBar } from "@/components/crm/PaginationBar";
 import { TALENT_STATUSES, formatStatusLabel } from "@/lib/crm/pipeline";
 import {
   buildListSearchParams,
   candidateWhere,
+  listQueryFromSearchParams,
 } from "@/lib/crm/list-query";
+import {
+  PAGE_SIZE,
+  orderByCreatedAt,
+  parsePage,
+  parseSort,
+  totalPages,
+} from "@/lib/crm/pagination";
 import { marketingResumeUrl } from "@/lib/crm/links";
 
 export const dynamic = "force-dynamic";
 
+const LIST_PATH = "/admin/candidates";
+
 function SearchFallback() {
   return (
-    <div className="min-h-12 animate-pulse rounded-2xl bg-zinc-200/60" aria-hidden />
+    <div
+      className="min-h-12 animate-pulse rounded-2xl bg-zinc-200/60"
+      aria-hidden
+    />
   );
 }
 
@@ -25,30 +40,48 @@ export default async function CandidatesPage({
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
-  const q = typeof searchParams.q === "string" ? searchParams.q : undefined;
-  const status =
-    typeof searchParams.status === "string" ? searchParams.status : undefined;
+  const lq = listQueryFromSearchParams(searchParams);
+  const q = lq.q;
+  const status = lq.status;
+  const sort = parseSort(lq.sort);
+  const page = parsePage(lq.page);
 
-  const chipBase = { q };
+  const where = candidateWhere(q, status);
+  const orderBy = orderByCreatedAt(sort);
+
+  const total = await prisma.crmCandidate.count({ where });
+  const pages = totalPages(total);
+  const safePage = Math.min(Math.max(1, page), pages);
 
   const candidates = await prisma.crmCandidate.findMany({
-    where: candidateWhere(q, status),
-    orderBy: { createdAt: "desc" },
-    take: 500,
+    where,
+    orderBy,
+    skip: (safePage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
   });
 
+  const chipBase = { q, sort };
   const chips = [
     {
-      href: `/admin/candidates${buildListSearchParams(chipBase, { status: null })}`,
+      href: `${LIST_PATH}${buildListSearchParams(chipBase, { status: null, page: null })}`,
       label: "All",
       active: !status,
     },
     ...TALENT_STATUSES.map((s) => ({
-      href: `/admin/candidates${buildListSearchParams(chipBase, { status: s.value })}`,
+      href: `${LIST_PATH}${buildListSearchParams(chipBase, {
+        status: s.value,
+        page: null,
+      })}`,
       label: s.label,
       active: status === s.value,
     })),
   ];
+
+  const exportParams = new URLSearchParams();
+  if (q) exportParams.set("q", q);
+  if (status) exportParams.set("status", status);
+  const exportQs = exportParams.toString();
+  const exportHref = `/api/crm/export/candidates${exportQs ? `?${exportQs}` : ""}`;
 
   return (
     <div className="space-y-5 md:space-y-6">
@@ -57,14 +90,21 @@ export default async function CandidatesPage({
           Talent pipeline
         </h1>
         <p className="mt-2 text-sm text-zinc-600">
-          Candidates from resume submissions. {candidates.length}{" "}
-          {candidates.length === 1 ? "row" : "rows"} (max 500).
+          Candidates from resume submissions. Showing {candidates.length} of{" "}
+          {total} (page {safePage} of {pages}).
         </p>
       </div>
 
       <Suspense fallback={<SearchFallback />}>
         <SearchForm placeholder="Search name, email, role, location…" />
       </Suspense>
+
+      <ListToolbar
+        listPath={LIST_PATH}
+        exportHref={exportHref}
+        current={lq}
+        sort={sort}
+      />
 
       <FilterChips chips={chips} />
 
@@ -105,7 +145,7 @@ export default async function CandidatesPage({
                   </div>
                   {resumeHref ? (
                     <p className="mt-3 text-xs font-semibold text-amber-800">
-                      Resume on file · tap to open profile
+                      Resume on file · open profile
                     </p>
                   ) : (
                     <p className="mt-3 text-xs font-semibold text-zinc-500">
@@ -222,6 +262,13 @@ export default async function CandidatesPage({
           </table>
         </div>
       </div>
+
+      <PaginationBar
+        listPath={LIST_PATH}
+        current={lq}
+        page={safePage}
+        totalPages={pages}
+      />
     </div>
   );
 }

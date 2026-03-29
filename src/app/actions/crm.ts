@@ -38,3 +38,13 @@ export async function updateCandidateStatus(id: string, status: string) {
   revalidatePath("/admin");
   revalidatePath(`/admin/candidates/${id}`);
 }
+
+export async function updateCandidateNotes(id: string, notes: string) {
+  const n = notes.slice(0, 8000);
+  await prisma.crmCandidate.update({
+    where: { id },
+    data: { notes: n || null },
+  });
+  revalidatePath("/admin/candidates");
+  revalidatePath(`/admin/candidates/${id}`);
+}

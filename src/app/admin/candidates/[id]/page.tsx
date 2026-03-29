@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import { CandidateStatusSelect } from "@/components/crm/CandidateStatusSelect";
+import { CandidateNotesForm } from "@/components/crm/CandidateNotesForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
 import { formatStatusLabel } from "@/lib/crm/pipeline";
 import { marketingResumeUrl } from "@/lib/crm/links";
@@ -138,6 +139,10 @@ export default async function CandidateDetailPage({
           </p>
         </section>
       ) : null}
+
+      <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
+        <CandidateNotesForm id={c.id} initial={c.notes} />
+      </section>
 
       <p className="px-1 text-center text-xs text-zinc-400">
         Applied {format(c.createdAt, "MMMM d, yyyy 'at' h:mm a")}
