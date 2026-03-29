@@ -10,7 +10,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  if (!process.env.THG_FORM_INTEGRATION_SECRET) {
+  if (!process.env.THG_FORM_INTEGRATION_SECRET?.trim()) {
     return integrationSecretMissingResponse();
   }
   if (!verifyIntegrationSecret(request)) {
@@ -67,7 +67,8 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (e) {
-    console.error("[integrations/contact]", e);
+    const code = e && typeof e === "object" && "code" in e ? String((e as { code: string }).code) : "";
+    console.error("[integrations/contact]", code || "", e);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 

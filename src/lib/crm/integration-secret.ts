@@ -12,14 +12,14 @@ export function integrationSecretMissingResponse() {
 
 /** Validates Authorization: Bearer <secret> or X-THG-Integration-Secret. */
 export function verifyIntegrationSecret(request: Request): boolean {
-  const expected = process.env.THG_FORM_INTEGRATION_SECRET;
+  const expected = process.env.THG_FORM_INTEGRATION_SECRET?.trim();
   if (!expected) return false;
 
   const auth = request.headers.get("authorization");
   const bearer =
     auth?.startsWith("Bearer ") ? auth.slice(7).trim() : null;
-  const header = request.headers.get("x-thg-integration-secret");
-  const provided = bearer ?? header ?? "";
+  const header = request.headers.get("x-thg-integration-secret")?.trim() ?? null;
+  const provided = (bearer ?? header ?? "").trim();
 
   if (provided.length !== expected.length) return false;
   let ok = 0;
