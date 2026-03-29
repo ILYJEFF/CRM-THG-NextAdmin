@@ -31,13 +31,17 @@ export async function uploadCrmContractToS3(params: {
   }
   const safe = params.fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
   const key = `crm-contracts/${Date.now()}-${safe}`;
+  const useAcl =
+    process.env.S3_USE_PUBLIC_READ_ACL === "1" ||
+    process.env.S3_USE_PUBLIC_READ_ACL === "true";
+
   await s3Client.send(
     new PutObjectCommand({
       Bucket: BUCKET,
       Key: key,
       Body: params.buffer,
       ContentType: params.contentType,
-      ACL: "public-read",
+      ...(useAcl ? { ACL: "public-read" as const } : {}),
     })
   );
   const region = process.env.AWS_REGION || "us-east-2";
