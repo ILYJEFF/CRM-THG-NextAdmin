@@ -17,6 +17,7 @@ import { loadContactJobDescriptionUrl } from "@/lib/crm/contact-job-description-
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 import { getActivitiesModuleReady } from "@/lib/crm/activities-module";
 import { ContactRecordHero } from "@/components/crm/ContactRecordHero";
+import { ContactSubmissionMessagePanel } from "@/components/crm/ContactSubmissionMessagePanel";
 import {
   RecordEntityTabs,
   RecordTabPanel,
@@ -206,12 +207,11 @@ export default async function ContactDetailPage({
               description="Original message from the website. This is the voice of the prospect; keep it in mind when you follow up."
               variant="emphasis"
             >
-              <p className="whitespace-pre-wrap text-base leading-relaxed text-zinc-800">
-                {contact.message}
-              </p>
-              <p className="mt-6 border-t border-amber-200/60 pt-4 text-xs text-zinc-500">
-                Submitted {createdAtLabel}
-              </p>
+              <ContactSubmissionMessagePanel
+                id={contact.id}
+                initial={contact.message}
+                submittedAtLabel={createdAtLabel}
+              />
             </RecordSectionCard>
           </RecordTabPanel>
 

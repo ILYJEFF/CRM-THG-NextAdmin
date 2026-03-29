@@ -11,8 +11,8 @@ Root: `thg-crm` (deploy target for `crm.thehammittgroup.com`).
 
 - **Leads list and detail**: `src/app/admin/contacts/page.tsx`, `src/app/admin/contacts/[id]/page.tsx`
 - **Mutations**: `src/app/actions/crm.ts` (prefer server actions + `revalidatePath`, not ad hoc fetch to nonexistent routes)
-- **Pipeline / stage UI**: `src/components/crm/ContactStatusSelect.tsx`; stage values and labels: `src/lib/crm/pipeline.ts`
-- **Hero / record chrome**: `src/components/crm/ContactRecordHero.tsx` and related `src/components/crm/*`
+- **Pipeline / stage UI**: `ContactStatusSelect.tsx`, `ContactStageTableCell.tsx` (list row), `ContactHeroPipelineStrip.tsx` (hero); values: `src/lib/crm/pipeline.ts`
+- **Hero / inquiry**: `ContactRecordHero.tsx`, `ContactSubmissionMessagePanel.tsx` (edit or clear submission message via `updateContactMessage` / `clearContactMessage` in `crm.ts`)
 - **Data model**: `prisma/schema.prisma` (`CrmContact`, `CrmClient`, etc.)
 
 The marketing site repo is separate (`thehammittgroup-website`). Sync from site forms uses integration routes under `src/app/api/integrations/`.

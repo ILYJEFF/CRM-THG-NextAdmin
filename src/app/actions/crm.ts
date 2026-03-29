@@ -33,6 +33,28 @@ export async function updateContactNotes(id: string, notes: string) {
   revalidatePath(`/admin/contacts/${id}`);
 }
 
+const CONTACT_MESSAGE_MAX = 50000;
+
+export async function updateContactMessage(id: string, message: string) {
+  const m = message.slice(0, CONTACT_MESSAGE_MAX);
+  await prisma.crmContact.update({
+    where: { id },
+    data: { message: m },
+  });
+  revalidatePath("/admin/contacts");
+  revalidatePath(`/admin/contacts/${id}`);
+}
+
+/** Removes stored inquiry text only; does not delete the lead row. */
+export async function clearContactMessage(id: string) {
+  await prisma.crmContact.update({
+    where: { id },
+    data: { message: "" },
+  });
+  revalidatePath("/admin/contacts");
+  revalidatePath(`/admin/contacts/${id}`);
+}
+
 export async function updateCandidateStatus(id: string, status: string) {
   const s = normalizeTalentStatus(status.trim() || "new");
   await prisma.crmCandidate.update({

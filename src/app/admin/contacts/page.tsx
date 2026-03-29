@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { formatCrm } from "@/lib/crm/datetime";
 import { FilterChips } from "@/components/crm/FilterChips";
 import { SearchForm } from "@/components/crm/SearchForm";
-import { StatusBadge } from "@/components/crm/StatusBadge";
+import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
+import { ContactStageTableCell } from "@/components/crm/ContactStageTableCell";
 import { ListToolbar } from "@/components/crm/ListToolbar";
 import { PaginationBar } from "@/components/crm/PaginationBar";
-import { CLIENT_LEAD_STATUSES, formatStatusLabel } from "@/lib/crm/pipeline";
+import { CLIENT_LEAD_STATUSES } from "@/lib/crm/pipeline";
 import {
   buildListSearchParams,
   contactWhere,
@@ -144,33 +145,27 @@ export default async function ContactsPage({
           </li>
         ) : (
           contacts.map((c) => (
-            <li key={c.id}>
+            <li
+              key={c.id}
+              className="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm"
+            >
               <Link
                 href={`/admin/contacts/${c.id}`}
-                className="block rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-sm transition active:scale-[0.99] hover:border-amber-200/80"
+                className="block p-4 transition active:scale-[0.99] hover:bg-amber-50/30"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-zinc-900">
-                      {c.contactName}
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-zinc-900">{c.contactName}</p>
+                  {c.companyName ? (
+                    <p className="mt-0.5 text-sm text-zinc-600">
+                      {c.companyName}
                     </p>
-                    {c.companyName ? (
-                      <p className="mt-0.5 text-sm text-zinc-600">
-                        {c.companyName}
-                      </p>
-                    ) : null}
-                    <p className="mt-2 truncate text-sm text-zinc-500">
-                      {c.email}
-                    </p>
-                    <p className="mt-1 text-xs text-zinc-400">
-                      {c.city} · {formatCrm(c.createdAt, "MMM d, yyyy")}
-                    </p>
-                  </div>
-                  <StatusBadge
-                    status={c.status}
-                    label={formatStatusLabel(c.status, "client")}
-                    className="shrink-0"
-                  />
+                  ) : null}
+                  <p className="mt-2 truncate text-sm text-zinc-500">
+                    {c.email}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-400">
+                    {c.city} · {formatCrm(c.createdAt, "MMM d, yyyy")}
+                  </p>
                 </div>
                 <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-zinc-600">
                   {c.message}
@@ -184,6 +179,9 @@ export default async function ContactsPage({
                   Open lead →
                 </p>
               </Link>
+              <div className="border-t border-zinc-200/80 bg-zinc-50/70 px-4 py-3">
+                <ContactStatusSelect id={c.id} current={c.status} />
+              </div>
             </li>
           ))
         )}
@@ -213,7 +211,7 @@ export default async function ContactsPage({
                   JD
                 </th>
                 <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
-                  Stage
+                  Pipeline
                 </th>
               </tr>
             </thead>
@@ -263,12 +261,7 @@ export default async function ContactsPage({
                       </p>
                     </td>
                     <JdTableCell href={jdHref} />
-                    <td className="px-4 py-3 align-top">
-                      <StatusBadge
-                        status={c.status}
-                        label={formatStatusLabel(c.status, "client")}
-                      />
-                    </td>
+                    <ContactStageTableCell id={c.id} current={c.status} />
                   </ClickableTableRow>
                 );
                 })

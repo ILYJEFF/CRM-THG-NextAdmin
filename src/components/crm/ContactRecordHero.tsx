@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/crm/StatusBadge";
+import { ContactHeroPipelineStrip } from "@/components/crm/ContactHeroPipelineStrip";
 
 type ContactHeroProps = {
   contactName: string;
@@ -11,6 +12,8 @@ type ContactHeroProps = {
   statusLabel: string;
   clientId: string | null;
   createdAtLabel: string;
+  /** When set, shows pipeline control in the hero (lead detail page). */
+  contactId?: string;
 };
 
 function initials(name: string): string {
@@ -30,6 +33,7 @@ export function ContactRecordHero({
   statusLabel,
   clientId,
   createdAtLabel,
+  contactId,
 }: ContactHeroProps) {
   const tel = phone.replace(/\s/g, "");
 
@@ -136,6 +140,14 @@ export function ContactRecordHero({
           ) : null}
         </div>
       </div>
+
+      {contactId ? (
+        <ContactHeroPipelineStrip
+          contactId={contactId}
+          clientId={clientId}
+          currentStatus={status}
+        />
+      ) : null}
     </header>
   );
 }
