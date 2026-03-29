@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatCrm } from "@/lib/crm/datetime";
@@ -6,18 +7,32 @@ import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
 import { LeadDangerZone } from "@/components/crm/LeadDangerZone";
 import { CrmActivitySection } from "@/components/crm/CrmActivitySection";
 import { ContactNotesForm } from "@/components/crm/ContactNotesForm";
-import { StatusBadge } from "@/components/crm/StatusBadge";
 import { formatStatusLabel } from "@/lib/crm/pipeline";
 import { marketingAssetUrl } from "@/lib/crm/links";
-import { MarketingDocumentCard } from "@/components/crm/MarketingDocumentCard";
 import {
   crmContactScalarSelect,
   crmContactScalarSelectLegacy,
 } from "@/lib/crm/crm-contact-select";
 import { loadContactJobDescriptionUrl } from "@/lib/crm/contact-job-description-url";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
+import { getActivitiesModuleReady } from "@/lib/crm/activities-module";
+import { ContactRecordHero } from "@/components/crm/ContactRecordHero";
+import {
+  RecordEntityTabs,
+  RecordTabPanel,
+} from "@/components/crm/RecordEntityTabs";
+import { RecordSectionCard } from "@/components/crm/RecordSectionCard";
 
 export const dynamic = "force-dynamic";
+
+function TabsFallback() {
+  return (
+    <div
+      className="-mx-4 h-14 animate-pulse rounded-none bg-zinc-200/50 sm:-mx-5 md:-mx-8"
+      aria-hidden
+    />
+  );
+}
 
 export default async function ContactDetailPage({
   params,
@@ -54,169 +69,230 @@ export default async function ContactDetailPage({
   const jd = await loadContactJobDescriptionUrl(id);
   const jobDescriptionHref = marketingAssetUrl(jd);
 
+  const activitiesReady = await getActivitiesModuleReady();
+  const activityCount = activitiesReady
+    ? await prisma.crmActivity.count({
+        where: { entityType: "contact", entityId: id },
+      })
+    : 0;
+
+  const statusLabel = formatStatusLabel(contact.status, "client");
+  const createdAtLabel = formatCrm(
+    contact.createdAt,
+    "MMMM d, yyyy 'at' h:mm a"
+  );
+
+  const tabDefs = [
+    { id: "overview", label: "Overview" },
+    { id: "inquiry", label: "Inquiry" },
+    {
+      id: "files",
+      label: "Files",
+      ...(jobDescriptionHref ? { badge: 1 } : {}),
+    },
+    { id: "pipeline", label: "Pipeline" },
+    {
+      id: "activity",
+      label: "Activity",
+      ...(activityCount > 0 ? { badge: activityCount } : {}),
+    },
+    { id: "notes", label: "Notes" },
+  ];
+
   return (
-    <div className="mx-auto max-w-2xl space-y-6 md:max-w-3xl">
-      <nav className="text-sm">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <nav className="flex flex-wrap items-center gap-2 text-sm">
         <Link
           href="/admin/contacts"
-          className="font-medium text-amber-800 hover:underline"
+          className="font-semibold text-amber-900 hover:text-amber-950 hover:underline"
         >
           ← All leads
         </Link>
+        <span className="text-zinc-300">·</span>
+        <span className="text-zinc-500">Lead record</span>
       </nav>
 
-      <div className="hidden items-start justify-between gap-4 md:flex">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
-            {contact.contactName}
-          </h1>
-          {contact.companyName ? (
-            <p className="mt-1 text-lg text-zinc-600">{contact.companyName}</p>
-          ) : null}
-        </div>
-        <StatusBadge
-          status={contact.status}
-          label={formatStatusLabel(contact.status, "client")}
-          className="shrink-0 scale-110"
-        />
-      </div>
-
-      <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm md:hidden">
-        <h1 className="text-xl font-semibold text-zinc-900">
-          {contact.contactName}
-        </h1>
-        {contact.companyName ? (
-          <p className="mt-1 text-zinc-600">{contact.companyName}</p>
-        ) : null}
-        <div className="mt-3">
-          <StatusBadge
-            status={contact.status}
-            label={formatStatusLabel(contact.status, "client")}
-          />
-        </div>
-      </div>
-
-      <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          Reach out
-        </h2>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <a
-            href={`mailto:${encodeURIComponent(contact.email)}`}
-            className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center rounded-2xl bg-[#0f1419] px-4 text-sm font-semibold text-white active:bg-zinc-800 sm:flex-initial sm:px-6"
-          >
-            Email
-          </a>
-          <a
-            href={`tel:${contact.phone.replace(/\s/g, "")}`}
-            className="inline-flex min-h-12 min-w-0 flex-1 items-center justify-center rounded-2xl border-2 border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-900 active:bg-zinc-50 sm:flex-initial sm:px-6"
-          >
-            Call
-          </a>
-        </div>
-        <dl className="mt-5 space-y-3 text-sm">
-          <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Email
-            </dt>
-            <dd className="mt-1 break-all font-medium text-zinc-900">
-              {contact.email}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Phone
-            </dt>
-            <dd className="mt-1 font-medium text-zinc-900">{contact.phone}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Location
-            </dt>
-            <dd className="mt-1 font-medium text-zinc-900">{contact.city}</dd>
-          </div>
-          {contact.industry ? (
-            <div>
-              <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-                Industry
-              </dt>
-              <dd className="mt-1 font-medium text-zinc-900">
-                {contact.industry}
-              </dd>
-            </div>
-          ) : null}
-          {contact.openPositions ? (
-            <div>
-              <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-                Open positions
-              </dt>
-              <dd className="mt-1 whitespace-pre-wrap font-medium text-zinc-900">
-                {contact.openPositions}
-              </dd>
-            </div>
-          ) : null}
-          {contact.payBand ? (
-            <div>
-              <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-                Pay band
-              </dt>
-              <dd className="mt-1 font-medium text-zinc-900">
-                {contact.payBand}
-              </dd>
-            </div>
-          ) : null}
-        </dl>
-      </section>
-
-      <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
-        {clientId ? (
-          <div className="space-y-3">
-            <p className="text-sm leading-relaxed text-zinc-600">
-              This lead is a client. Job orders and contracts are tracked on the
-              client profile.
-            </p>
-            <Link
-              href={`/admin/clients/${clientId}`}
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500"
-            >
-              Open client profile
-            </Link>
-          </div>
-        ) : (
-          <ContactStatusSelect id={contact.id} current={contact.status} />
-        )}
-      </section>
-
-      <LeadDangerZone
-        contactId={contact.id}
+      <ContactRecordHero
+        contactName={contact.contactName}
+        companyName={contact.companyName}
+        email={contact.email}
+        phone={contact.phone}
+        city={contact.city}
+        status={contact.status}
+        statusLabel={statusLabel}
         clientId={clientId}
-        clientsModuleReady={gate.state === "ok"}
+        createdAtLabel={createdAtLabel}
       />
 
-      <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          Inquiry from website
-        </h2>
-        <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed text-zinc-800">
-          {contact.message}
-        </p>
-        <p className="mt-4 text-xs text-zinc-400">
-          Submitted {formatCrm(contact.createdAt, "MMMM d, yyyy 'at' h:mm a")}
-        </p>
-      </section>
+      <Suspense fallback={<TabsFallback />}>
+        <RecordEntityTabs defaultTabId="overview" tabs={tabDefs}>
+          <RecordTabPanel id="overview">
+            <RecordSectionCard
+              title="Contact details"
+              description="Everything we know from the form and your updates. Use this when prepping a call or email."
+            >
+              <dl className="grid gap-6 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    Email
+                  </dt>
+                  <dd className="mt-1 break-all text-sm font-medium text-zinc-900">
+                    <a
+                      href={`mailto:${encodeURIComponent(contact.email)}`}
+                      className="text-amber-900 hover:underline"
+                    >
+                      {contact.email}
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    Phone
+                  </dt>
+                  <dd className="mt-1 text-sm font-medium text-zinc-900">
+                    <a
+                      href={`tel:${contact.phone.replace(/\s/g, "")}`}
+                      className="hover:text-amber-900 hover:underline"
+                    >
+                      {contact.phone}
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    Location
+                  </dt>
+                  <dd className="mt-1 text-sm font-medium text-zinc-900">
+                    {contact.city}
+                  </dd>
+                </div>
+                {contact.industry ? (
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                      Industry
+                    </dt>
+                    <dd className="mt-1 text-sm font-medium text-zinc-900">
+                      {contact.industry}
+                    </dd>
+                  </div>
+                ) : null}
+                {contact.openPositions ? (
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                      Open positions / needs
+                    </dt>
+                    <dd className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-800">
+                      {contact.openPositions}
+                    </dd>
+                  </div>
+                ) : null}
+                {contact.payBand ? (
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                      Pay band
+                    </dt>
+                    <dd className="mt-1 text-sm font-medium text-zinc-900">
+                      {contact.payBand}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            </RecordSectionCard>
+          </RecordTabPanel>
 
-      <MarketingDocumentCard
-        title="Job description"
-        description="Uploaded from the client contact form, if provided."
-        href={jobDescriptionHref}
-        fileLabel="Open job description"
-      />
+          <RecordTabPanel id="inquiry">
+            <RecordSectionCard
+              title="What they sent"
+              description="Original message from the website. This is the voice of the prospect; keep it in mind when you follow up."
+              variant="emphasis"
+            >
+              <p className="whitespace-pre-wrap text-base leading-relaxed text-zinc-800">
+                {contact.message}
+              </p>
+              <p className="mt-6 border-t border-amber-200/60 pt-4 text-xs text-zinc-500">
+                Submitted {createdAtLabel}
+              </p>
+            </RecordSectionCard>
+          </RecordTabPanel>
 
-      <CrmActivitySection entityType="contact" entityId={contact.id} />
+          <RecordTabPanel id="files">
+            <RecordSectionCard
+              title="Attachments"
+              description="Files submitted with this lead. Open in a new tab to review before a call."
+            >
+              {jobDescriptionHref ? (
+                <a
+                  href={jobDescriptionHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 text-sm font-semibold text-zinc-950 shadow-sm ring-1 ring-amber-600/25 transition hover:from-amber-400 hover:to-amber-500 sm:w-auto"
+                >
+                  Open job description
+                </a>
+              ) : (
+                <p className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/80 px-4 py-8 text-center text-sm text-zinc-500">
+                  No job description file was uploaded with this submission.
+                </p>
+              )}
+            </RecordSectionCard>
+          </RecordTabPanel>
 
-      <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
-        <ContactNotesForm id={contact.id} initial={contact.notes} />
-      </section>
+          <RecordTabPanel id="pipeline">
+            <RecordSectionCard
+              title="Stage"
+              description="Move the lead through your pipeline. When the deal is real, convert to a client to unlock job orders and contracts."
+            >
+              {clientId ? (
+                <div className="space-y-4">
+                  <p className="text-sm leading-relaxed text-zinc-600">
+                    This lead is tied to an active client. Job orders, career
+                    posts, and contracts live on the client workspace.
+                  </p>
+                  <Link
+                    href={`/admin/clients/${clientId}`}
+                    className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500"
+                  >
+                    Go to client workspace
+                  </Link>
+                </div>
+              ) : (
+                <ContactStatusSelect id={contact.id} current={contact.status} />
+              )}
+            </RecordSectionCard>
+            <LeadDangerZone
+              contactId={contact.id}
+              clientId={clientId}
+              clientsModuleReady={gate.state === "ok"}
+            />
+          </RecordTabPanel>
+
+          <RecordTabPanel id="activity">
+            <RecordSectionCard
+              title="Activity log"
+              description="Log calls, emails, and meetings so the next person on this lead sees the full story."
+            >
+              <CrmActivitySection
+                embedded
+                entityType="contact"
+                entityId={contact.id}
+              />
+            </RecordSectionCard>
+          </RecordTabPanel>
+
+          <RecordTabPanel id="notes">
+            <RecordSectionCard
+              title="Internal notes"
+              description="Private to your team. Summarize calls, next steps, and context the next person should not have to hunt for."
+            >
+              <ContactNotesForm
+                id={contact.id}
+                initial={contact.notes}
+                hideLabel
+              />
+            </RecordSectionCard>
+          </RecordTabPanel>
+        </RecordEntityTabs>
+      </Suspense>
     </div>
   );
 }

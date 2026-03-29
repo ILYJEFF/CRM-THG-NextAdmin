@@ -7,9 +7,12 @@ import { CrmActivityForm } from "@/components/crm/CrmActivityForm";
 export async function CrmActivitySection({
   entityType,
   entityId,
+  embedded,
 }: {
   entityType: "contact" | "client" | "candidate";
   entityId: string;
+  /** Omit outer card when wrapped by RecordSectionCard or similar */
+  embedded?: boolean;
 }) {
   const ready = await getActivitiesModuleReady();
   if (!ready) {
@@ -40,17 +43,21 @@ export async function CrmActivitySection({
     take: 150,
   });
 
-  return (
-    <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
-      <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-        Activity log
-      </h2>
-      <p className="mt-2 text-sm leading-relaxed text-zinc-600">
-        Every call, email, and note stays on this record so nothing lives only
-        in someone&apos;s inbox.
-      </p>
+  const body = (
+    <>
+      {embedded ? null : (
+        <>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            Activity log
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-600">
+            Every call, email, and note stays on this record so nothing lives
+            only in someone&apos;s inbox.
+          </p>
+        </>
+      )}
 
-      <div className="mt-4">
+      <div className={embedded ? "" : "mt-4"}>
         <CrmActivityForm entityType={entityType} entityId={entityId} />
       </div>
 
@@ -83,6 +90,16 @@ export async function CrmActivitySection({
           ))
         )}
       </ul>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="space-y-0">{body}</div>;
+  }
+
+  return (
+    <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
+      {body}
     </section>
   );
 }

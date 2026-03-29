@@ -6,9 +6,12 @@ import { updateContactNotes } from "@/app/actions/crm";
 export function ContactNotesForm({
   id,
   initial,
+  hideLabel,
 }: {
   id: string;
   initial: string | null;
+  /** When the parent already shows a section title */
+  hideLabel?: boolean;
 }) {
   const [pending, startTransition] = useTransition();
 
@@ -21,9 +24,11 @@ export function ContactNotesForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">
-        Internal notes
-      </label>
+      {hideLabel ? null : (
+        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Internal notes
+        </label>
+      )}
       <textarea
         name="notes"
         rows={5}

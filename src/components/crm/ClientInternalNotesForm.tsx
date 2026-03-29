@@ -6,9 +6,11 @@ import { updateClientInternalNotes } from "@/app/actions/crm";
 export function ClientInternalNotesForm({
   clientId,
   initial,
+  hideLabel,
 }: {
   clientId: string;
   initial: string | null;
+  hideLabel?: boolean;
 }) {
   const [pending, startTransition] = useTransition();
 
@@ -21,9 +23,11 @@ export function ClientInternalNotesForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">
-        Account notes
-      </label>
+      {hideLabel ? null : (
+        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Account notes
+        </label>
+      )}
       <textarea
         name="notes"
         rows={6}
