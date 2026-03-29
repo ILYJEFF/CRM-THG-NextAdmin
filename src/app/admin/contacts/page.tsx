@@ -21,6 +21,8 @@ import {
   totalPages,
 } from "@/lib/crm/pagination";
 import { marketingAssetUrl } from "@/lib/crm/links";
+import { crmContactScalarSelect } from "@/lib/crm/crm-contact-select";
+import { loadContactJobDescriptionUrlMap } from "@/lib/crm/contact-job-description-url";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +60,12 @@ export default async function ContactsPage({
     orderBy,
     skip: (safePage - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
+    select: crmContactScalarSelect,
   });
+
+  const jdMap = await loadContactJobDescriptionUrlMap(
+    contacts.map((c) => c.id)
+  );
 
   const chipBase = { q, sort };
   const chips = [
@@ -146,7 +153,7 @@ export default async function ContactsPage({
                 <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-zinc-600">
                   {c.message}
                 </p>
-                {c.jobDescriptionUrl ? (
+                {jdMap.get(c.id) ? (
                   <p className="mt-2 text-xs font-semibold text-emerald-800">
                     Job description on file
                   </p>
@@ -200,7 +207,7 @@ export default async function ContactsPage({
                 </tr>
               ) : (
                 contacts.map((c) => {
-                  const jdHref = marketingAssetUrl(c.jobDescriptionUrl);
+                  const jdHref = marketingAssetUrl(jdMap.get(c.id) ?? null);
                   return (
                   <tr
                     key={c.id}

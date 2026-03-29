@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { getCrmSessionUser } from "@/lib/crm/auth-crm";
 import { contactWhere } from "@/lib/crm/list-query";
 import { toCsvRow } from "@/lib/crm/csv";
+import { crmContactScalarSelect } from "@/lib/crm/crm-contact-select";
+import { loadContactJobDescriptionUrlMap } from "@/lib/crm/contact-job-description-url";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +22,10 @@ export async function GET(request: NextRequest) {
     where,
     orderBy: { createdAt: "desc" },
     take: 10000,
+    select: crmContactScalarSelect,
   });
+
+  const jdMap = await loadContactJobDescriptionUrlMap(rows.map((r) => r.id));
 
   const header = [
     "id",
@@ -51,7 +56,7 @@ export async function GET(request: NextRequest) {
       r.status,
       r.notes ?? "",
       r.message,
-      r.jobDescriptionUrl ?? "",
+      jdMap.get(r.id) ?? "",
       r.createdAt.toISOString(),
       r.updatedAt.toISOString(),
     ]);

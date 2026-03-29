@@ -7,6 +7,8 @@ import { StatusBadge } from "@/components/crm/StatusBadge";
 import { formatStatusLabel } from "@/lib/crm/pipeline";
 import { marketingAssetUrl } from "@/lib/crm/links";
 import { MarketingDocumentCard } from "@/components/crm/MarketingDocumentCard";
+import { crmContactScalarSelect } from "@/lib/crm/crm-contact-select";
+import { loadContactJobDescriptionUrl } from "@/lib/crm/contact-job-description-url";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +18,14 @@ export default async function ContactDetailPage({
   params: { id: string };
 }) {
   const { id } = params;
-  const contact = await prisma.crmContact.findUnique({ where: { id } });
+  const contact = await prisma.crmContact.findUnique({
+    where: { id },
+    select: crmContactScalarSelect,
+  });
   if (!contact) notFound();
 
-  const jobDescriptionHref = marketingAssetUrl(contact.jobDescriptionUrl);
+  const jd = await loadContactJobDescriptionUrl(id);
+  const jobDescriptionHref = marketingAssetUrl(jd);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 md:max-w-3xl">
