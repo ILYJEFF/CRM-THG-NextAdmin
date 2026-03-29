@@ -21,9 +21,7 @@ export async function updateContactStatus(id: string, status: string) {
     where: { id },
     data: { status: s },
   });
-  revalidatePath("/admin/contacts");
   revalidatePath("/admin");
-  revalidatePath(`/admin/contacts/${id}`);
 }
 
 export async function updateJobApplicationStatus(id: string, status: string) {
@@ -58,9 +56,7 @@ export async function updateContactMarketingPipelineStage(
     }
     throw e;
   }
-  revalidatePath("/admin/contacts");
   revalidatePath("/admin");
-  revalidatePath(`/admin/contacts/${id}`);
 }
 
 export async function updateContactNotes(id: string, notes: string) {
@@ -69,8 +65,7 @@ export async function updateContactNotes(id: string, notes: string) {
     where: { id },
     data: { notes: n || null },
   });
-  revalidatePath("/admin/contacts");
-  revalidatePath(`/admin/contacts/${id}`);
+  revalidatePath("/admin");
 }
 
 const CONTACT_MESSAGE_MAX = 50000;
@@ -81,8 +76,7 @@ export async function updateContactMessage(id: string, message: string) {
     where: { id },
     data: { message: m },
   });
-  revalidatePath("/admin/contacts");
-  revalidatePath(`/admin/contacts/${id}`);
+  revalidatePath("/admin");
 }
 
 /** Removes stored inquiry text only; does not delete the lead row. */
@@ -91,8 +85,7 @@ export async function clearContactMessage(id: string) {
     where: { id },
     data: { message: "" },
   });
-  revalidatePath("/admin/contacts");
-  revalidatePath(`/admin/contacts/${id}`);
+  revalidatePath("/admin");
 }
 
 export async function updateCandidateStatus(id: string, status: string) {
@@ -103,7 +96,6 @@ export async function updateCandidateStatus(id: string, status: string) {
   });
   revalidatePath("/admin/candidates");
   revalidatePath("/admin");
-  revalidatePath(`/admin/candidates/${id}`);
 }
 
 export async function updateCandidateNotes(
@@ -124,7 +116,7 @@ export async function updateCandidateNotes(
     };
   }
   revalidatePath("/admin/candidates");
-  revalidatePath(`/admin/candidates/${id}`);
+  revalidatePath("/admin");
   return { ok: true };
 }
 
@@ -189,9 +181,6 @@ export async function convertContactToClient(
       return cl;
     });
 
-    revalidatePath("/admin/contacts");
-    revalidatePath(`/admin/contacts/${contactId}`);
-    revalidatePath("/admin/clients");
     revalidatePath("/admin");
     return { ok: true, clientId: client.id };
   } catch (e) {
@@ -221,7 +210,6 @@ export async function deleteContactLead(
       };
     }
     await prisma.crmContact.delete({ where: { id } });
-    revalidatePath("/admin/contacts");
     revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
@@ -240,8 +228,7 @@ export async function updateClientInternalNotes(clientId: string, notes: string)
     where: { id: clientId },
     data: { internalNotes: n || null },
   });
-  revalidatePath("/admin/clients");
-  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath("/admin");
 }
 
 const jobOrderCreateSchema = z.object({
@@ -281,9 +268,7 @@ export async function createJobOrder(
         status: "open",
       },
     });
-    revalidatePath(`/admin/clients/${clientId}`);
-    revalidatePath("/admin/clients");
-    revalidatePath("/admin/jobs");
+    revalidatePath("/admin");
     return { ok: true, id: row.id };
   } catch (e) {
     console.error("[createJobOrder]", e);
@@ -297,26 +282,20 @@ export async function createJobOrder(
 
 export async function updateJobOrderStatus(id: string, status: string) {
   const s = (status || "open").trim().slice(0, 64);
-  const row = await prisma.crmJobOrder.update({
+  await prisma.crmJobOrder.update({
     where: { id },
     data: { status: s },
-    select: { clientId: true },
   });
-  revalidatePath(`/admin/clients/${row.clientId}`);
-  revalidatePath("/admin/clients");
-  revalidatePath("/admin/jobs");
+  revalidatePath("/admin");
 }
 
 export async function updateJobOrderPriority(id: string, priority: string) {
   const p = (priority || "normal").trim().slice(0, 32);
-  const row = await prisma.crmJobOrder.update({
+  await prisma.crmJobOrder.update({
     where: { id },
     data: { priority: p },
-    select: { clientId: true },
   });
-  revalidatePath(`/admin/clients/${row.clientId}`);
-  revalidatePath("/admin/clients");
-  revalidatePath("/admin/jobs");
+  revalidatePath("/admin");
 }
 
 export async function deleteJobOrder(
@@ -329,9 +308,7 @@ export async function deleteJobOrder(
     });
     if (!row) return { ok: false, error: "Job order not found." };
     await prisma.crmJobOrder.delete({ where: { id } });
-    revalidatePath(`/admin/clients/${row.clientId}`);
-    revalidatePath("/admin/clients");
-    revalidatePath("/admin/jobs");
+    revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
     return {
@@ -369,8 +346,7 @@ export async function addClientContractLink(
         mimeType: null,
       },
     });
-    revalidatePath(`/admin/clients/${clientId}`);
-    revalidatePath("/admin/clients");
+    revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
     return {
@@ -390,8 +366,7 @@ export async function deleteClientContract(
     });
     if (!row) return { ok: false, error: "Not found." };
     await prisma.crmClientContract.delete({ where: { id } });
-    revalidatePath(`/admin/clients/${row.clientId}`);
-    revalidatePath("/admin/clients");
+    revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
     return {
@@ -428,7 +403,7 @@ export async function saveJobOrderCareerDraft(
   }
   const p = parsed.data;
   try {
-    const row = await prisma.crmJobOrder.update({
+    await prisma.crmJobOrder.update({
       where: { id: jobOrderId },
       data: {
         publicDescription: p.publicDescription?.trim() || null,
@@ -441,10 +416,8 @@ export async function saveJobOrderCareerDraft(
         salaryMax: p.salaryMax ?? null,
         salaryPeriod: p.salaryPeriod ?? null,
       },
-      select: { clientId: true },
     });
-    revalidatePath(`/admin/clients/${row.clientId}`);
-    revalidatePath("/admin/jobs");
+    revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
     return {
@@ -534,8 +507,7 @@ export async function syncJobOrderCareerPosting(
       where: { id: jobOrderId },
       data: { careerLastSyncAt: now, careerLastError: result.error },
     });
-    revalidatePath(`/admin/clients/${job.clientId}`);
-    revalidatePath("/admin/jobs");
+    revalidatePath("/admin");
     return result;
   }
 
@@ -549,8 +521,7 @@ export async function syncJobOrderCareerPosting(
       careerLastError: null,
     },
   });
-  revalidatePath(`/admin/clients/${job.clientId}`);
-  revalidatePath("/admin/jobs");
+  revalidatePath("/admin");
   return { ok: true };
 }
 
@@ -579,9 +550,7 @@ export async function assignCandidateToJobOrder(
       error: e instanceof Error ? e.message : "Could not assign.",
     };
   }
-  revalidatePath(`/admin/candidates/${candidateId}`);
-  revalidatePath("/admin/jobs");
-  revalidatePath("/admin/clients");
+  revalidatePath("/admin");
   return { ok: true };
 }
 
@@ -591,18 +560,11 @@ export async function updateSubmissionStage(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const s = normalizeSubmissionStage(stage);
   try {
-    const row = await prisma.crmSubmission.update({
+    await prisma.crmSubmission.update({
       where: { id: submissionId },
       data: { stage: s },
-      select: { candidateId: true, jobOrderId: true },
     });
-    revalidatePath(`/admin/candidates/${row.candidateId}`);
-    revalidatePath("/admin/jobs");
-    const job = await prisma.crmJobOrder.findUnique({
-      where: { id: row.jobOrderId },
-      select: { clientId: true },
-    });
-    if (job) revalidatePath(`/admin/clients/${job.clientId}`);
+    revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
     return {
@@ -622,13 +584,7 @@ export async function removeSubmission(
     });
     if (!row) return { ok: false, error: "Not found." };
     await prisma.crmSubmission.delete({ where: { id: submissionId } });
-    revalidatePath(`/admin/candidates/${row.candidateId}`);
-    revalidatePath("/admin/jobs");
-    const job = await prisma.crmJobOrder.findUnique({
-      where: { id: row.jobOrderId },
-      select: { clientId: true },
-    });
-    if (job) revalidatePath(`/admin/clients/${job.clientId}`);
+    revalidatePath("/admin");
     return { ok: true };
   } catch (e) {
     return {
@@ -701,16 +657,9 @@ export async function addCrmActivity(
     };
   }
 
-  if (entityType === "contact") {
-    revalidatePath(`/admin/contacts/${entityId}`);
-    revalidatePath("/admin/contacts");
-  } else if (entityType === "client") {
-    revalidatePath(`/admin/clients/${entityId}`);
-    revalidatePath("/admin/clients");
-  } else {
-    revalidatePath(`/admin/candidates/${entityId}`);
+  revalidatePath("/admin");
+  if (entityType === "candidate") {
     revalidatePath("/admin/candidates");
   }
-  revalidatePath("/admin");
   return { ok: true };
 }

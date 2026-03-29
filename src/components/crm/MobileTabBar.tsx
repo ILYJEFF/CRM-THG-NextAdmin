@@ -12,28 +12,16 @@ const tabs = [
     icon: DeskIcon,
   },
   {
-    href: "/admin/contacts",
-    label: "Leads",
-    match: (p: string) => p.startsWith("/admin/contacts"),
-    icon: LeadsIcon,
-  },
-  {
-    href: "/admin/clients",
-    label: "Clients",
-    match: (p: string) => p.startsWith("/admin/clients"),
-    icon: ClientsIcon,
-  },
-  {
-    href: "/admin/jobs",
-    label: "Jobs",
-    match: (p: string) => p.startsWith("/admin/jobs"),
-    icon: JobsPipelineIcon,
+    href: "/admin/applicants",
+    label: "Applies",
+    match: (p: string) => p.startsWith("/admin/applicants"),
+    icon: ApplyIcon,
   },
   {
     href: "/admin/candidates",
     label: "Resumes",
     match: (p: string) => p.startsWith("/admin/candidates"),
-    icon: TalentIcon,
+    icon: ResumeIcon,
   },
 ];
 
@@ -56,45 +44,7 @@ function DeskIcon({ active }: { active: boolean }) {
   );
 }
 
-function LeadsIcon({ active }: { active: boolean }) {
-  return (
-    <svg
-      className={cn("h-5 w-5", active ? "text-amber-400" : "text-zinc-500")}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.75}
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-      />
-    </svg>
-  );
-}
-
-function ClientsIcon({ active }: { active: boolean }) {
-  return (
-    <svg
-      className={cn("h-5 w-5", active ? "text-amber-400" : "text-zinc-500")}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.75}
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M2.25 21h19.5m-18-18v18m15-18v18m-9-8.25h.008v.008H12.75V12.75zm0 3.75h.008v.008H12.75V16.5zm0-7.5h.008v.008H12.75V9zm5.25 5.25h.008v.008H18V12.75zm0 3.75h.008v.008H18V16.5zm0-7.5h.008v.008H18V9zm-12 5.25h.008v.008H6V12.75zm0 3.75h.008v.008H6V16.5zm0-7.5h.008v.008H6V9z"
-      />
-    </svg>
-  );
-}
-
-function JobsPipelineIcon({ active }: { active: boolean }) {
+function ApplyIcon({ active }: { active: boolean }) {
   return (
     <svg
       className={cn("h-5 w-5", active ? "text-amber-400" : "text-zinc-500")}
@@ -113,7 +63,7 @@ function JobsPipelineIcon({ active }: { active: boolean }) {
   );
 }
 
-function TalentIcon({ active }: { active: boolean }) {
+function ResumeIcon({ active }: { active: boolean }) {
   return (
     <svg
       className={cn("h-5 w-5", active ? "text-amber-400" : "text-zinc-500")}

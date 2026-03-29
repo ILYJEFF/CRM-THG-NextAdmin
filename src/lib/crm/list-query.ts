@@ -93,7 +93,16 @@ export type ListQueryBase = {
   wp?: string;
   sort?: string;
   page?: string;
+  /** Desk dashboard segment: leads (open), clients, or all contacts. */
+  view?: string;
 };
+
+export type DeskViewMode = "leads" | "clients" | "all";
+
+export function parseDeskView(raw: string | undefined): DeskViewMode {
+  if (raw === "clients" || raw === "all") return raw;
+  return "leads";
+}
 
 export function listQueryFromSearchParams(
   sp: Record<string, string | string[] | undefined>
@@ -108,7 +117,18 @@ export function listQueryFromSearchParams(
     wp: g("wp"),
     sort: g("sort"),
     page: g("page"),
+    view: g("view"),
   };
+}
+
+/** Open leads only (not yet linked to a client account). Requires clientId on schema. */
+export function deskLeadsWhere(
+  q?: string | null,
+  status?: string | null,
+  websitePipeline?: string | null
+): Prisma.CrmContactWhereInput {
+  const base = contactWhere(q, status, websitePipeline);
+  return { AND: [base, { clientId: null }] };
 }
 
 export function clientWhere(q?: string | null): Prisma.CrmClientWhereInput {

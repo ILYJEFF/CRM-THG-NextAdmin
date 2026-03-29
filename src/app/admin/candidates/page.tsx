@@ -1,13 +1,10 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
-import { formatCrm } from "@/lib/crm/datetime";
 import { FilterChips } from "@/components/crm/FilterChips";
 import { SearchForm } from "@/components/crm/SearchForm";
-import { StatusBadge } from "@/components/crm/StatusBadge";
 import { ListToolbar } from "@/components/crm/ListToolbar";
 import { PaginationBar } from "@/components/crm/PaginationBar";
-import { TALENT_STATUSES, formatStatusLabel } from "@/lib/crm/pipeline";
+import { TALENT_STATUSES } from "@/lib/crm/pipeline";
 import {
   buildListSearchParams,
   candidateWhere,
@@ -20,15 +17,21 @@ import {
   parseSort,
   totalPages,
 } from "@/lib/crm/pagination";
-import { marketingResumeUrl } from "@/lib/crm/links";
 import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
-import { ClickableTableRow } from "@/components/crm/ClickableTableRow";
-import { JdTableCell } from "@/components/crm/JdTableCell";
 import { CrmPageHeader } from "@/components/crm/CrmPageHeader";
+import {
+  ResumeSubmissionsTable,
+  type ResumeRow,
+} from "@/components/crm/ResumeSubmissionsTable";
 
 export const dynamic = "force-dynamic";
 
 const LIST_PATH = "/admin/candidates";
+
+const candidateListSelect = {
+  ...crmCandidateScalarSelect,
+  notes: true,
+} as const;
 
 function SearchFallback() {
   return (
@@ -37,6 +40,40 @@ function SearchFallback() {
       aria-hidden
     />
   );
+}
+
+function toResumeRow(c: {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  currentLocation: string;
+  desiredLocation: string;
+  industry: string;
+  positionType: string;
+  resumeUrl: string | null;
+  coverLetter: string | null;
+  status: string;
+  notes: string | null;
+  createdAt: Date;
+}): ResumeRow {
+  return {
+    id: c.id,
+    firstName: c.firstName,
+    lastName: c.lastName,
+    email: c.email,
+    phone: c.phone,
+    currentLocation: c.currentLocation,
+    desiredLocation: c.desiredLocation,
+    industry: c.industry,
+    positionType: c.positionType,
+    resumeUrl: c.resumeUrl,
+    coverLetter: c.coverLetter,
+    status: c.status,
+    notes: c.notes,
+    createdAt: c.createdAt.toISOString(),
+  };
 }
 
 export default async function CandidatesPage({
@@ -57,13 +94,43 @@ export default async function CandidatesPage({
   const pages = totalPages(total);
   const safePage = Math.min(Math.max(1, page), pages);
 
-  const candidates = await prisma.crmCandidate.findMany({
-    where,
-    select: crmCandidateScalarSelect,
-    orderBy,
-    skip: (safePage - 1) * PAGE_SIZE,
-    take: PAGE_SIZE,
-  });
+  let list: Array<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    currentLocation: string;
+    desiredLocation: string;
+    industry: string;
+    positionType: string;
+    resumeUrl: string | null;
+    coverLetter: string | null;
+    status: string;
+    notes: string | null;
+    createdAt: Date;
+  }>;
+
+  try {
+    list = await prisma.crmCandidate.findMany({
+      where,
+      select: candidateListSelect,
+      orderBy,
+      skip: (safePage - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    });
+  } catch {
+    const basic = await prisma.crmCandidate.findMany({
+      where,
+      select: crmCandidateScalarSelect,
+      orderBy,
+      skip: (safePage - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    });
+    list = basic.map((r) => ({ ...r, notes: null as string | null }));
+  }
+
+  const rows = list.map(toResumeRow);
 
   const chipBase = { q, sort };
   const chips = [
@@ -92,7 +159,7 @@ export default async function CandidatesPage({
     <div className="space-y-6 md:space-y-8">
       <CrmPageHeader
         title="Resume submissions"
-        description={`People who uploaded a resume through the site (not job-specific applies). Showing ${candidates.length} of ${total} (page ${safePage} of ${pages}).`}
+        description={`General resume uploads from the site (not job posting applies). Showing ${rows.length} of ${total} (page ${safePage} of ${pages}). Expand a row for notes and stage.`}
       />
 
       <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/40 p-4 shadow-inner md:p-5">
@@ -115,148 +182,7 @@ export default async function CandidatesPage({
         <FilterChips chips={chips} />
       </div>
 
-      <ul className="space-y-3 md:hidden">
-        {candidates.length === 0 ? (
-          <li className="rounded-2xl border border-dashed border-zinc-300 bg-white/80 px-4 py-12 text-center text-sm text-zinc-500">
-            No submissions match. Try another filter or search.
-          </li>
-        ) : (
-          candidates.map((c) => {
-            const resumeHref = marketingResumeUrl(c.resumeUrl);
-            return (
-              <li key={c.id}>
-                <Link
-                  href={`/admin/candidates/${c.id}`}
-                  className="block rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-md shadow-zinc-900/5 ring-1 ring-zinc-950/[0.03] transition active:scale-[0.99] hover:border-amber-200/80"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-zinc-900">
-                        {c.firstName} {c.lastName}
-                      </p>
-                      <p className="mt-1 truncate text-sm text-zinc-600">
-                        {c.positionType}
-                      </p>
-                      <p className="mt-0.5 text-xs text-zinc-500">
-                        Wants {c.desiredLocation} · from {c.currentLocation}
-                      </p>
-                      <p className="mt-2 truncate text-xs text-zinc-400">
-                        {formatCrm(c.createdAt, "MMM d, yyyy")}
-                      </p>
-                    </div>
-                    <StatusBadge
-                      status={c.status}
-                      label={formatStatusLabel(c.status, "talent")}
-                      className="shrink-0"
-                    />
-                  </div>
-                  {resumeHref ? (
-                    <p className="mt-3 text-xs font-semibold text-amber-800">
-                      Resume on file · open profile
-                    </p>
-                  ) : (
-                    <p className="mt-3 text-xs font-semibold text-zinc-500">
-                      Open profile →
-                    </p>
-                  )}
-                </Link>
-              </li>
-            );
-          })
-        )}
-      </ul>
-
-      <div className="hidden overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-lg shadow-zinc-900/[0.06] ring-1 ring-zinc-950/[0.04] md:block">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50/90">
-                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
-                  Received
-                </th>
-                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
-                  Candidate
-                </th>
-                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
-                  Target role
-                </th>
-                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
-                  Locations
-                </th>
-                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
-                  Resume
-                </th>
-                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
-                  Stage
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {candidates.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-4 py-12 text-center text-zinc-500"
-                  >
-                    No submissions match this view.
-                  </td>
-                </tr>
-              ) : (
-                candidates.map((c) => {
-                  const resumeHref = marketingResumeUrl(c.resumeUrl);
-                  return (
-                    <ClickableTableRow
-                      key={c.id}
-                      href={`/admin/candidates/${c.id}`}
-                    >
-                      <td className="whitespace-nowrap px-4 py-3 align-top text-zinc-600">
-                        {formatCrm(c.createdAt, "MMM d, yyyy")}
-                        <span className="block text-xs text-zinc-400">
-                          {formatCrm(c.createdAt, "h:mm a")}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 align-top">
-                        <span className="font-medium text-zinc-900">
-                          {c.firstName} {c.lastName}
-                        </span>
-                        <span className="mt-0.5 block break-all text-xs text-zinc-500">
-                          {c.email}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 align-top text-zinc-700">
-                        <span className="font-medium text-zinc-800">
-                          {c.positionType}
-                        </span>
-                        <span className="mt-0.5 block text-xs text-zinc-500">
-                          {c.industry}
-                        </span>
-                      </td>
-                      <td className="max-w-[140px] px-4 py-3 align-top text-xs text-zinc-600">
-                        <span className="text-zinc-400">Open to</span>{" "}
-                        {c.desiredLocation}
-                        <br />
-                        <span className="text-zinc-400">Based</span>{" "}
-                        {c.currentLocation}
-                      </td>
-                      <JdTableCell
-                        href={resumeHref}
-                        label="Open file"
-                        linkClassName="text-amber-800"
-                      />
-                      <td className="px-4 py-3 align-top">
-                        <StatusBadge
-                          status={c.status}
-                          label={formatStatusLabel(c.status, "talent")}
-                        />
-                      </td>
-                    </ClickableTableRow>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <ResumeSubmissionsTable rows={rows} />
 
       <PaginationBar
         listPath={LIST_PATH}

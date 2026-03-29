@@ -29,8 +29,8 @@ export default async function AdminLayout({
             Recruiting CRM
           </h1>
           <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-            Leads, active clients, job orders, contracts, and talent in one
-            workspace.
+            Leads and clients on the desk. Applications and resumes on their own
+            lists.
           </p>
           <p className="mt-2 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
             Times · {CRM_TIME_ZONE_LABEL} (Chicago)

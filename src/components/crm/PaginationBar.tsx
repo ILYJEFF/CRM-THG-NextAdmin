@@ -19,6 +19,7 @@ export function PaginationBar({
     status: current.status,
     wp: current.wp,
     sort: current.sort,
+    view: current.view,
   };
 
   const prev =
