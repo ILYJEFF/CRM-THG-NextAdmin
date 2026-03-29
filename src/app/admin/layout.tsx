@@ -24,7 +24,8 @@ export default function AdminLayout({
             Recruiting CRM
           </h1>
           <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-            Client leads and talent from your website forms.
+            Leads, active clients, job orders, contracts, and talent in one
+            workspace.
           </p>
         </div>
         <nav className="flex-1 space-y-1 p-3">

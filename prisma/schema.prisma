@@ -8,7 +8,7 @@ datasource db {
 }
 
 model CrmContact {
-  id                String   @id @default(cuid())
+  id                String     @id @default(cuid())
   companyName       String?
   contactName       String
   email             String
@@ -17,12 +17,62 @@ model CrmContact {
   industry          String?
   message           String
   jobDescriptionUrl String?
-  status            String   @default("new")
+  status            String     @default("new")
   notes             String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  clientId          String?    @unique
+  client            CrmClient? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 
   @@map("crm_contacts")
+}
+
+model CrmClient {
+  id              String               @id @default(cuid())
+  companyName     String?
+  contactName     String
+  email           String
+  phone           String
+  city            String
+  industry        String?
+  internalNotes   String?
+  convertedLead   CrmContact?
+  jobOrders       CrmJobOrder[]
+  contracts       CrmClientContract[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@map("crm_clients")
+}
+
+model CrmJobOrder {
+  id           String    @id @default(cuid())
+  clientId     String
+  client       CrmClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title        String
+  roleSummary  String?
+  status       String    @default("open")
+  priority     String    @default("normal")
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([clientId])
+  @@map("crm_job_orders")
+}
+
+model CrmClientContract {
+  id        String    @id @default(cuid())
+  clientId  String
+  client    CrmClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  label     String?
+  fileUrl   String
+  fileName  String
+  mimeType  String?
+  createdAt DateTime  @default(now())
+
+  @@index([clientId])
+  @@map("crm_client_contracts")
 }
 
 model CrmCandidate {

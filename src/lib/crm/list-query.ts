@@ -62,6 +62,20 @@ export function listQueryFromSearchParams(
   };
 }
 
+export function clientWhere(q?: string | null): Prisma.CrmClientWhereInput {
+  const trimmed = q?.trim();
+  if (!trimmed) return {};
+  return {
+    OR: [
+      { contactName: { contains: trimmed, mode: "insensitive" } },
+      { email: { contains: trimmed, mode: "insensitive" } },
+      { companyName: { contains: trimmed, mode: "insensitive" } },
+      { city: { contains: trimmed, mode: "insensitive" } },
+      { phone: { contains: trimmed } },
+    ],
+  };
+}
+
 export function candidateWhere(
   q?: string | null,
   status?: string | null

@@ -16,6 +16,7 @@ export const crmContactScalarSelect = {
   message: true,
   status: true,
   notes: true,
+  clientId: true,
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.CrmContactSelect;

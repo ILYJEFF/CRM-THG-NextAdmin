@@ -8,7 +8,7 @@ export function ListToolbar({
   sort,
 }: {
   listPath: string;
-  exportHref: string;
+  exportHref?: string | null;
   current: ListQueryBase;
   sort: "newest" | "oldest";
 }) {
@@ -40,12 +40,14 @@ export function ListToolbar({
           Oldest first
         </Link>
       </div>
-      <a
-        href={exportHref}
-        className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-zinc-300 bg-white px-5 text-sm font-semibold text-zinc-900 transition active:bg-zinc-50"
-      >
-        Export CSV
-      </a>
+      {exportHref ? (
+        <a
+          href={exportHref}
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-zinc-300 bg-white px-5 text-sm font-semibold text-zinc-900 transition active:bg-zinc-50"
+        >
+          Export CSV
+        </a>
+      ) : null}
     </div>
   );
 }

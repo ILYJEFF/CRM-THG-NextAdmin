@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
+import { LeadDangerZone } from "@/components/crm/LeadDangerZone";
 import { ContactNotesForm } from "@/components/crm/ContactNotesForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
 import { formatStatusLabel } from "@/lib/crm/pipeline";
@@ -29,6 +31,15 @@ export default async function ContactDetailPage({
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 md:max-w-3xl">
+      <nav className="text-sm">
+        <Link
+          href="/admin/contacts"
+          className="font-medium text-amber-800 hover:underline"
+        >
+          ← All leads
+        </Link>
+      </nav>
+
       <div className="hidden items-start justify-between gap-4 md:flex">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
@@ -113,8 +124,25 @@ export default async function ContactDetailPage({
       </section>
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
-        <ContactStatusSelect id={contact.id} current={contact.status} />
+        {contact.clientId ? (
+          <div className="space-y-3">
+            <p className="text-sm leading-relaxed text-zinc-600">
+              This lead is a client. Job orders and contracts are tracked on the
+              client profile.
+            </p>
+            <Link
+              href={`/admin/clients/${contact.clientId}`}
+              className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500"
+            >
+              Open client profile
+            </Link>
+          </div>
+        ) : (
+          <ContactStatusSelect id={contact.id} current={contact.status} />
+        )}
       </section>
+
+      <LeadDangerZone contactId={contact.id} clientId={contact.clientId} />
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">

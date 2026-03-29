@@ -7,6 +7,26 @@ export const CLIENT_LEAD_STATUSES = [
   { value: "won", label: "Won" },
   { value: "lost", label: "Lost" },
   { value: "archived", label: "Archived" },
+  { value: "converted", label: "Converted" },
+  { value: "deleted", label: "Deleted" },
+] as const;
+
+/** Job orders (placements / searches) under an active client */
+export const JOB_ORDER_STATUSES = [
+  { value: "open", label: "Open" },
+  { value: "sourcing", label: "Sourcing" },
+  { value: "interview", label: "Interview" },
+  { value: "offer", label: "Offer" },
+  { value: "filled", label: "Filled" },
+  { value: "on_hold", label: "On hold" },
+  { value: "closed", label: "Closed" },
+] as const;
+
+export const JOB_ORDER_PRIORITIES = [
+  { value: "low", label: "Low" },
+  { value: "normal", label: "Normal" },
+  { value: "high", label: "High" },
+  { value: "urgent", label: "Urgent" },
 ] as const;
 
 /** Talent pipeline (candidates from resume submissions) */
@@ -47,6 +67,23 @@ export function statusBadgeClass(status: string): string {
   if (s === "submitted" || s === "offer")
     return "bg-orange-100 text-orange-950 ring-orange-200/80";
   return "bg-zinc-100 text-zinc-800 ring-zinc-200/80";
+}
+
+export function jobOrderStatusBadgeClass(status: string): string {
+  const s = status.toLowerCase();
+  if (s === "open") return "bg-sky-100 text-sky-900 ring-sky-200/80";
+  if (s === "sourcing") return "bg-amber-100 text-amber-950 ring-amber-200/80";
+  if (s === "interview" || s === "offer")
+    return "bg-violet-100 text-violet-900 ring-violet-200/80";
+  if (s === "filled") return "bg-emerald-100 text-emerald-900 ring-emerald-200/80";
+  if (s === "closed" || s === "on_hold")
+    return "bg-zinc-200 text-zinc-700 ring-zinc-300/80";
+  return "bg-zinc-100 text-zinc-800 ring-zinc-200/80";
+}
+
+export function formatJobOrderStatusLabel(status: string): string {
+  const found = JOB_ORDER_STATUSES.find((x) => x.value === status);
+  return found?.label ?? status;
 }
 
 export function formatStatusLabel(

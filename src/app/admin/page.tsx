@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminHomePage() {
   const [
     contactTotal,
+    clientTotal,
     candidateTotal,
     newContacts,
     newCandidates,
@@ -25,6 +26,7 @@ export default async function AdminHomePage() {
     companyNameRows,
   ] = await Promise.all([
     prisma.crmContact.count(),
+    prisma.crmClient.count(),
     prisma.crmCandidate.count(),
     prisma.crmContact.count({ where: { status: "new" } }),
     prisma.crmCandidate.count({ where: { status: "new" } }),
@@ -72,12 +74,13 @@ export default async function AdminHomePage() {
           Recruiting desk
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600">
-          Website inquiries become client leads. Resume submissions land in
-          talent. Use pipeline stages to track outreach and placements.
+          Inquiries start as leads. Convert wins to active clients, then run job
+          orders and store contracts in one place. Talent stays on its own
+          pipeline.
         </p>
       </div>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Link
           href="/admin/contacts?status=new"
           className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm transition active:scale-[0.99] hover:border-amber-300/80 hover:shadow-md"
@@ -106,7 +109,21 @@ export default async function AdminHomePage() {
             Screen & qualify →
           </p>
         </Link>
-        <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+        <Link
+          href="/admin/clients"
+          className="rounded-2xl border border-zinc-200/90 bg-gradient-to-br from-white to-emerald-50/50 p-5 shadow-sm transition active:scale-[0.99] hover:border-emerald-300/80 hover:shadow-md"
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            Active clients
+          </p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
+            {clientTotal}
+          </p>
+          <p className="mt-2 text-sm font-medium text-emerald-800">
+            Job orders & contracts →
+          </p>
+        </Link>
+        <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
             All client leads
           </p>
@@ -120,7 +137,7 @@ export default async function AdminHomePage() {
             Open list
           </Link>
         </div>
-        <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+        <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
             All candidates
           </p>

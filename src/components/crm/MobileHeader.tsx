@@ -7,8 +7,11 @@ import { cn } from "@/lib/cn";
 function titleForPath(path: string): { title: string; back?: string } {
   if (path === "/admin") return { title: "Recruiting desk" };
   if (path === "/admin/contacts") return { title: "Client leads" };
+  if (path === "/admin/clients") return { title: "Active clients" };
   if (path === "/admin/candidates") return { title: "Talent pipeline" };
   if (path === "/admin/companies") return { title: "Company accounts" };
+  if (path.startsWith("/admin/clients/"))
+    return { title: "Client", back: "/admin/clients" };
   if (path.startsWith("/admin/contacts/"))
     return { title: "Lead", back: "/admin/contacts" };
   if (path.startsWith("/admin/candidates/"))
