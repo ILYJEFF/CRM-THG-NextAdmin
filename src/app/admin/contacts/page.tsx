@@ -8,10 +8,7 @@ import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
 import { ContactStageTableCell } from "@/components/crm/ContactStageTableCell";
 import { ListToolbar } from "@/components/crm/ListToolbar";
 import { PaginationBar } from "@/components/crm/PaginationBar";
-import {
-  CLIENT_LEAD_STATUSES,
-  MARKETING_WEBSITE_PIPELINE_OPTIONS,
-} from "@/lib/crm/pipeline";
+import { CLIENT_LEAD_STATUSES } from "@/lib/crm/pipeline";
 import {
   buildListSearchParams,
   contactWhere,
@@ -35,6 +32,8 @@ import { ClickableTableRow } from "@/components/crm/ClickableTableRow";
 import { JdTableCell } from "@/components/crm/JdTableCell";
 import { ContactWebsitePipelineTableCell } from "@/components/crm/ContactWebsitePipelineTableCell";
 import { ContactWebsitePipelineSelect } from "@/components/crm/ContactWebsitePipelineSelect";
+import { CrmPageHeader } from "@/components/crm/CrmPageHeader";
+import { WebsitePipelineFilterSelect } from "@/components/crm/WebsitePipelineFilterSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -113,26 +112,6 @@ export default async function ContactsPage({
     })),
   ];
 
-  const websiteChipBase = { q, sort, status };
-  const websiteChips = [
-    {
-      href: `${LIST_PATH}${buildListSearchParams(websiteChipBase, {
-        wp: null,
-        page: null,
-      })}`,
-      label: "All sites",
-      active: !wp,
-    },
-    ...MARKETING_WEBSITE_PIPELINE_OPTIONS.map((s) => ({
-      href: `${LIST_PATH}${buildListSearchParams(websiteChipBase, {
-        wp: s.value,
-        page: null,
-      })}`,
-      label: s.label,
-      active: wp === s.value,
-    })),
-  ];
-
   const exportParams = new URLSearchParams();
   if (q) exportParams.set("q", q);
   if (status) exportParams.set("status", status);
@@ -141,35 +120,32 @@ export default async function ContactsPage({
   const exportHref = `/api/crm/export/contacts${exportQs ? `?${exportQs}` : ""}`;
 
   return (
-    <div className="space-y-5 md:space-y-6">
-      <div className="hidden md:block">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
-          Leads
-        </h1>
-        <p className="mt-2 text-sm text-zinc-600">
-          Employers and hiring managers from your site. Showing{" "}
-          {contacts.length} of {total} (page {safePage} of {pages}).
-        </p>
-      </div>
+    <div className="space-y-6 md:space-y-8">
+      <CrmPageHeader
+        title="Leads"
+        description={`Employers from your site. Showing ${contacts.length} of ${total} (page ${safePage} of ${pages}). Filter by desk status below. Use Site stage to match the marketing admin spreadsheet.`}
+      />
 
-      <Suspense fallback={<SearchFallback />}>
-        <SearchForm placeholder="Search name, email, company, city…" />
-      </Suspense>
+      <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/40 p-4 shadow-inner md:p-5">
+        <Suspense fallback={<SearchFallback />}>
+          <SearchForm placeholder="Search name, email, company, city…" />
+        </Suspense>
+      </div>
 
       <ListToolbar
         listPath={LIST_PATH}
         exportHref={exportHref}
         current={lq}
         sort={sort}
-      />
+      >
+        <WebsitePipelineFilterSelect listPath={LIST_PATH} current={lq} />
+      </ListToolbar>
 
-      <FilterChips chips={chips} />
-
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-violet-900/80">
-          Website pipeline
+      <div>
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          Desk status
         </p>
-        <FilterChips chips={websiteChips} />
+        <FilterChips chips={chips} />
       </div>
 
       <ul className="space-y-3 md:hidden">
@@ -181,7 +157,7 @@ export default async function ContactsPage({
           contacts.map((c) => (
             <li
               key={c.id}
-              className="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm"
+              className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-md shadow-zinc-900/5 ring-1 ring-zinc-950/[0.03]"
             >
               <Link
                 href={`/admin/contacts/${c.id}`}
@@ -225,7 +201,7 @@ export default async function ContactsPage({
         )}
       </ul>
 
-      <div className="hidden overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm md:block">
+      <div className="hidden overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-lg shadow-zinc-900/[0.06] ring-1 ring-zinc-950/[0.04] md:block">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[860px] text-left text-sm">
             <thead>

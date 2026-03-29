@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 import { contactWhere } from "@/lib/crm/list-query";
+import { CrmPageHeader } from "@/components/crm/CrmPageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +11,7 @@ export default async function CompaniesPage() {
   if (gate.state === "db_error") {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold text-zinc-900">
-          Company accounts
-        </h1>
+        <h1 className="text-2xl font-semibold text-zinc-900">Companies</h1>
         <p className="text-sm text-zinc-600">
           Data cannot load until the database connection works.
         </p>
@@ -40,18 +39,13 @@ export default async function CompaniesPage() {
   const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="space-y-5 md:space-y-6">
-      <div className="hidden md:block">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
-          Company accounts
-        </h1>
-        <p className="mt-2 text-sm text-zinc-600">
-          Grouped from open lead forms that included a company name. Tap
-          a row to search leads for that employer.
-        </p>
-      </div>
+    <div className="space-y-6 md:space-y-8">
+      <CrmPageHeader
+        title="Companies"
+        description="Distinct employer names from open leads. Open a row to jump to matching leads."
+      />
 
-      <ul className="space-y-2 md:rounded-2xl md:border md:border-zinc-200/90 md:bg-white md:shadow-sm md:divide-y md:divide-zinc-100">
+      <ul className="space-y-2 overflow-hidden md:rounded-2xl md:border md:border-zinc-200/80 md:bg-white md:shadow-lg md:shadow-zinc-900/[0.06] md:ring-1 md:ring-zinc-950/[0.04] md:divide-y md:divide-zinc-100">
         {sorted.length === 0 ? (
           <li className="rounded-2xl border border-dashed border-zinc-300 bg-white/80 px-4 py-12 text-center text-sm text-zinc-500 md:border-0 md:bg-transparent">
             No company names on file yet. When leads submit with an

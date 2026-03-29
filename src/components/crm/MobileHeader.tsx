@@ -7,10 +7,12 @@ import { cn } from "@/lib/cn";
 function titleForPath(path: string): { title: string; back?: string } {
   if (path === "/admin") return { title: "Recruiting desk" };
   if (path === "/admin/contacts") return { title: "Leads" };
+  if (path === "/admin/contact-directory") return { title: "All contacts" };
+  if (path === "/admin/applicants") return { title: "Applicants" };
   if (path === "/admin/clients") return { title: "Active clients" };
   if (path === "/admin/jobs") return { title: "Job orders" };
-  if (path === "/admin/candidates") return { title: "Talent pipeline" };
-  if (path === "/admin/companies") return { title: "Company accounts" };
+  if (path === "/admin/candidates") return { title: "Resume submissions" };
+  if (path === "/admin/companies") return { title: "Companies" };
   if (path === "/admin/playbook") return { title: "Desk playbook", back: "/admin" };
   if (path === "/admin/playbook/manage")
     return { title: "Playbook CMS", back: "/admin/playbook" };

@@ -181,6 +181,30 @@ model CrmCandidate {
   @@map("crm_candidates")
 }
 
+/// Job posting apply form (marketing site), not the general resume submission.
+model CrmJobApplication {
+  id              String   @id
+  jobPostingId    String
+  jobTitle        String?
+  jobCompanyName  String?
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  currentLocation String?
+  coverLetter     String?  @db.Text
+  resumeUrl       String
+  status          String   @default("new")
+  notes           String?  @db.Text
+  createdAt       DateTime
+  updatedAt       DateTime
+
+  @@index([jobPostingId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("crm_job_applications")
+}
+
 /// Touch history: calls, emails, meetings, notes on a lead, client, or candidate
 model CrmActivity {
   id           String   @id @default(cuid())

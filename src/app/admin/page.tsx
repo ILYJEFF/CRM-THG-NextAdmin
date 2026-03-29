@@ -16,6 +16,7 @@ import {
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 import { getActivitiesModuleReady } from "@/lib/crm/activities-module";
 import { formatActivityTypeLabel } from "@/lib/crm/pipeline";
+import { CrmPageHeader } from "@/components/crm/CrmPageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -206,19 +207,10 @@ export default async function AdminHomePage() {
 
   return (
     <div className="space-y-8 md:space-y-10">
-      <div className="hidden md:block">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
-          Recruiting desk
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600">
-          Inquiries become leads, then active clients. Job orders power your
-          searches: publish to the career site, assign candidates, and keep
-          contracts next to each account.
-        </p>
-        <p className="mt-2 text-xs font-medium text-zinc-500">
-          Dates and times are shown in {CRM_TIME_ZONE_LABEL} (Chicago).
-        </p>
-      </div>
+      <CrmPageHeader
+        title="Recruiting desk"
+        description={`Inquiries become leads, then active clients. Job orders power your searches: publish to the career site, assign candidates, and keep contracts next to each account. Dates and times use ${CRM_TIME_ZONE_LABEL} (Chicago).`}
+      />
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-sm md:p-5">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -246,7 +238,7 @@ export default async function AdminHomePage() {
               href="/admin/companies"
               className="inline-flex min-h-10 items-center rounded-full bg-white px-4 text-sm font-semibold text-zinc-800 ring-1 ring-zinc-200 transition hover:bg-zinc-50"
             >
-              Company accounts
+              Companies
             </Link>
           </li>
           <li>
@@ -414,7 +406,7 @@ export default async function AdminHomePage() {
           className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm transition active:scale-[0.99] hover:border-amber-300/80 hover:shadow-md"
         >
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            New talent
+            New resumes
           </p>
           <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
             {newCandidates}
@@ -467,7 +459,7 @@ export default async function AdminHomePage() {
         </div>
         <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            All candidates
+            Resume submissions
           </p>
           <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
             {candidateTotal}
@@ -476,7 +468,7 @@ export default async function AdminHomePage() {
             href="/admin/candidates"
             className="mt-2 inline-block text-sm font-medium text-zinc-600 hover:text-amber-800"
           >
-            Open pipeline
+            Open list
           </Link>
         </div>
       </section>
@@ -486,7 +478,7 @@ export default async function AdminHomePage() {
         className="block rounded-2xl border border-zinc-200/90 bg-gradient-to-r from-white to-amber-50/40 p-5 shadow-sm transition active:scale-[0.99] hover:border-amber-300/80 hover:shadow-md md:inline-block md:min-w-[280px]"
       >
         <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          Employer accounts
+          Companies
         </p>
         <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
           {uniqueEmployers}
@@ -521,7 +513,7 @@ export default async function AdminHomePage() {
 
         <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-zinc-900">
-            Talent pipeline
+            Resume submissions
           </h2>
           <ul className="mt-4 flex flex-wrap gap-2">
             {TALENT_STATUSES.map((s) => {
@@ -630,7 +622,7 @@ export default async function AdminHomePage() {
         <section>
           <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-zinc-900">
-              Latest talent
+              Latest resumes
             </h2>
             <Link
               href="/admin/candidates"
@@ -642,7 +634,7 @@ export default async function AdminHomePage() {
           <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm">
             {recentCandidates.length === 0 ? (
               <li className="px-4 py-10 text-center text-sm text-zinc-500">
-                No candidates yet.
+                No resume submissions yet.
               </li>
             ) : (
               recentCandidates.map((c) => (

@@ -24,6 +24,7 @@ import { marketingResumeUrl } from "@/lib/crm/links";
 import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
 import { ClickableTableRow } from "@/components/crm/ClickableTableRow";
 import { JdTableCell } from "@/components/crm/JdTableCell";
+import { CrmPageHeader } from "@/components/crm/CrmPageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -88,20 +89,17 @@ export default async function CandidatesPage({
   const exportHref = `/api/crm/export/candidates${exportQs ? `?${exportQs}` : ""}`;
 
   return (
-    <div className="space-y-5 md:space-y-6">
-      <div className="hidden md:block">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
-          Talent pipeline
-        </h1>
-        <p className="mt-2 text-sm text-zinc-600">
-          Candidates from resume submissions. Showing {candidates.length} of{" "}
-          {total} (page {safePage} of {pages}).
-        </p>
-      </div>
+    <div className="space-y-6 md:space-y-8">
+      <CrmPageHeader
+        title="Resume submissions"
+        description={`People who uploaded a resume through the site (not job-specific applies). Showing ${candidates.length} of ${total} (page ${safePage} of ${pages}).`}
+      />
 
-      <Suspense fallback={<SearchFallback />}>
-        <SearchForm placeholder="Search name, email, role, location…" />
-      </Suspense>
+      <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/40 p-4 shadow-inner md:p-5">
+        <Suspense fallback={<SearchFallback />}>
+          <SearchForm placeholder="Search name, email, role, location…" />
+        </Suspense>
+      </div>
 
       <ListToolbar
         listPath={LIST_PATH}
@@ -110,12 +108,17 @@ export default async function CandidatesPage({
         sort={sort}
       />
 
-      <FilterChips chips={chips} />
+      <div>
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          Desk stage
+        </p>
+        <FilterChips chips={chips} />
+      </div>
 
       <ul className="space-y-3 md:hidden">
         {candidates.length === 0 ? (
           <li className="rounded-2xl border border-dashed border-zinc-300 bg-white/80 px-4 py-12 text-center text-sm text-zinc-500">
-            No candidates match. Try another filter or search.
+            No submissions match. Try another filter or search.
           </li>
         ) : (
           candidates.map((c) => {
@@ -124,7 +127,7 @@ export default async function CandidatesPage({
               <li key={c.id}>
                 <Link
                   href={`/admin/candidates/${c.id}`}
-                  className="block rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-sm transition active:scale-[0.99] hover:border-amber-200/80"
+                  className="block rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-md shadow-zinc-900/5 ring-1 ring-zinc-950/[0.03] transition active:scale-[0.99] hover:border-amber-200/80"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -163,7 +166,7 @@ export default async function CandidatesPage({
         )}
       </ul>
 
-      <div className="hidden overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm md:block">
+      <div className="hidden overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-lg shadow-zinc-900/[0.06] ring-1 ring-zinc-950/[0.04] md:block">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px] text-left text-sm">
             <thead>
@@ -195,7 +198,7 @@ export default async function CandidatesPage({
                     colSpan={6}
                     className="px-4 py-12 text-center text-zinc-500"
                   >
-                    No candidates match this view.
+                    No submissions match this view.
                   </td>
                 </tr>
               ) : (

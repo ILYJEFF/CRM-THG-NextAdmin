@@ -31,7 +31,7 @@ const tabs = [
   },
   {
     href: "/admin/candidates",
-    label: "Talent",
+    label: "Resumes",
     match: (p: string) => p.startsWith("/admin/candidates"),
     icon: TalentIcon,
   },

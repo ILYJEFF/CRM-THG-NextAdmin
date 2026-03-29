@@ -58,6 +58,25 @@ export const CLIENT_LEAD_DESK_PIPELINE = CLIENT_LEAD_STATUSES.filter(
 /** Default leads list excludes these (use Active clients / filters to find them) */
 export const LEAD_LIST_EXCLUDED_STATUSES = ["converted", "deleted"] as const;
 
+/** Job apply form on the marketing career site (not general resume intake). */
+export const JOB_APPLICATION_STATUSES = [
+  { value: "new", label: "New" },
+  { value: "reviewed", label: "Reviewed" },
+  { value: "interviewed", label: "Interviewed" },
+  { value: "rejected", label: "Rejected" },
+  { value: "hired", label: "Hired" },
+] as const;
+
+export function normalizeJobApplicationStatus(raw: string): string {
+  const t = (raw.trim() || "new").slice(0, 32);
+  return JOB_APPLICATION_STATUSES.some((s) => s.value === t) ? t : "new";
+}
+
+export function formatJobApplicationStatusLabel(status: string): string {
+  const row = JOB_APPLICATION_STATUSES.find((s) => s.value === status);
+  return row?.label ?? status;
+}
+
 /** Job orders (placements / searches) under an active client */
 export const JOB_ORDER_STATUSES = [
   { value: "open", label: "Open" },

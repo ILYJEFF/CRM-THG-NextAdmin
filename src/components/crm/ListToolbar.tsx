@@ -1,16 +1,18 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { buildListSearchParams, type ListQueryBase } from "@/lib/crm/list-query";
-
 export function ListToolbar({
   listPath,
   exportHref,
   current,
   sort,
+  children,
 }: {
   listPath: string;
   exportHref?: string | null;
   current: ListQueryBase;
   sort: "newest" | "oldest";
+  children?: ReactNode;
 }) {
   const q = { q: current.q, status: current.status, wp: current.wp };
   const newestHref = `${listPath}${buildListSearchParams(q, { sort: null, page: null })}`;
@@ -40,14 +42,17 @@ export function ListToolbar({
           Oldest first
         </Link>
       </div>
-      {exportHref ? (
-        <a
-          href={exportHref}
-          className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-zinc-300 bg-white px-5 text-sm font-semibold text-zinc-900 transition active:bg-zinc-50"
-        >
-          Export CSV
-        </a>
-      ) : null}
+      <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+        {children}
+        {exportHref ? (
+          <a
+            href={exportHref}
+            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50/80 px-5 text-sm font-semibold text-zinc-900 shadow-sm transition hover:bg-white active:bg-zinc-100"
+          >
+            Export CSV
+          </a>
+        ) : null}
+      </div>
     </div>
   );
 }

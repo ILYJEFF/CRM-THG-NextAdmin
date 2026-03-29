@@ -66,7 +66,9 @@ export default async function AdminLayout({
         >
           <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-5 sm:py-7 md:px-8 md:py-10">
             <CrmSchemaBanner gate={gate} />
-            {children}
+            <div className="rounded-[1.75rem] border border-zinc-200/70 bg-white/[0.92] p-5 shadow-[0_16px_48px_-20px_rgba(15,20,25,0.18)] ring-1 ring-zinc-950/[0.04] backdrop-blur-sm sm:p-6 md:p-8 md:px-10">
+              {children}
+            </div>
           </div>
         </main>
         <MobileTabBar />

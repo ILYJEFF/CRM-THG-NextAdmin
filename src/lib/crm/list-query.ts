@@ -51,6 +51,40 @@ export function contactWhere(
   return { AND: parts };
 }
 
+/** Every CRM contact row (no default status exclusion). Optional filters only. */
+export function contactDirectoryWhere(
+  q?: string | null,
+  status?: string | null,
+  websitePipeline?: string | null
+): Prisma.CrmContactWhereInput {
+  const parts: Prisma.CrmContactWhereInput[] = [];
+  const trimmed = q?.trim();
+  if (trimmed) {
+    parts.push({
+      OR: [
+        { contactName: { contains: trimmed, mode: "insensitive" } },
+        { email: { contains: trimmed, mode: "insensitive" } },
+        { companyName: { contains: trimmed, mode: "insensitive" } },
+        { city: { contains: trimmed, mode: "insensitive" } },
+        { phone: { contains: trimmed } },
+        { message: { contains: trimmed, mode: "insensitive" } },
+        { openPositions: { contains: trimmed, mode: "insensitive" } },
+        { payBand: { contains: trimmed, mode: "insensitive" } },
+      ],
+    });
+  }
+  if (status?.trim()) {
+    parts.push({ status: status.trim() });
+  }
+  const wp = websitePipeline?.trim();
+  if (wp) {
+    parts.push({ pipelineStage: wp });
+  }
+  if (parts.length === 0) return {};
+  if (parts.length === 1) return parts[0];
+  return { AND: parts };
+}
+
 /** Base query keys carried across list filters (pagination, sort, search). */
 export type ListQueryBase = {
   q?: string;
@@ -89,6 +123,32 @@ export function clientWhere(q?: string | null): Prisma.CrmClientWhereInput {
       { phone: { contains: trimmed } },
     ],
   };
+}
+
+export function jobApplicationWhere(
+  q?: string | null,
+  status?: string | null
+): Prisma.CrmJobApplicationWhereInput {
+  const parts: Prisma.CrmJobApplicationWhereInput[] = [];
+  const trimmed = q?.trim();
+  if (trimmed) {
+    parts.push({
+      OR: [
+        { firstName: { contains: trimmed, mode: "insensitive" } },
+        { lastName: { contains: trimmed, mode: "insensitive" } },
+        { email: { contains: trimmed, mode: "insensitive" } },
+        { phone: { contains: trimmed } },
+        { jobTitle: { contains: trimmed, mode: "insensitive" } },
+        { jobCompanyName: { contains: trimmed, mode: "insensitive" } },
+      ],
+    });
+  }
+  if (status?.trim()) {
+    parts.push({ status: status.trim() });
+  }
+  if (parts.length === 0) return {};
+  if (parts.length === 1) return parts[0];
+  return { AND: parts };
 }
 
 export function candidateWhere(

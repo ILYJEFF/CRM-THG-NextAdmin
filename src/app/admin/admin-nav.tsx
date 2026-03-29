@@ -56,12 +56,14 @@ export function AdminNav() {
       </NavGroup>
       <NavGroup label="Pipeline">
         <NavLink href="/admin/contacts">Leads</NavLink>
-        <NavLink href="/admin/candidates">Talent pipeline</NavLink>
+        <NavLink href="/admin/contact-directory">All contacts</NavLink>
+        <NavLink href="/admin/candidates">Resume submissions</NavLink>
+        <NavLink href="/admin/applicants">Applicants</NavLink>
         <NavLink href="/admin/jobs">Job orders</NavLink>
       </NavGroup>
       <NavGroup label="Accounts">
         <NavLink href="/admin/clients">Active clients</NavLink>
-        <NavLink href="/admin/companies">Company accounts</NavLink>
+        <NavLink href="/admin/companies">Companies</NavLink>
       </NavGroup>
       <NavGroup label="Marketing">
         <NavLink href="/admin/marketing/email-templates">

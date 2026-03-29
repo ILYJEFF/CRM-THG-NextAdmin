@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import {
   normalizeClientStatus,
+  normalizeJobApplicationStatus,
   normalizeMarketingPipelineStage,
   normalizeTalentStatus,
   normalizeSubmissionStage,
@@ -23,6 +24,16 @@ export async function updateContactStatus(id: string, status: string) {
   revalidatePath("/admin/contacts");
   revalidatePath("/admin");
   revalidatePath(`/admin/contacts/${id}`);
+}
+
+export async function updateJobApplicationStatus(id: string, status: string) {
+  const s = normalizeJobApplicationStatus(status);
+  await prisma.crmJobApplication.update({
+    where: { id },
+    data: { status: s },
+  });
+  revalidatePath("/admin/applicants");
+  revalidatePath("/admin");
 }
 
 export async function updateContactMarketingPipelineStage(
