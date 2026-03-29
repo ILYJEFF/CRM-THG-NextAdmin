@@ -3,7 +3,8 @@
  * connection through PgBouncer. Without this, parallel queries (or Promise.all)
  * can exhaust Prisma's pool and hit "Timed out fetching a new connection".
  *
- * Neon / Vercel URLs often already include `connection_limit=5` or similar.
+ * Hosted Postgres URLs (Vercel, Supabase pooler, etc.) often already include
+ * `connection_limit=5` or similar.
  * Those defaults must be overridden, or serverless invocations starve the pool.
  */
 export function applyServerlessDbUrl(url: string): string {
