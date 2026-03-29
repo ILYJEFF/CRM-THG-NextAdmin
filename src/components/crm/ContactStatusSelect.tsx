@@ -16,7 +16,7 @@ export function ContactStatusSelect({
   return (
     <div className="relative">
       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
-        Pipeline stage
+        Desk status
       </label>
       <select
         disabled={pending}

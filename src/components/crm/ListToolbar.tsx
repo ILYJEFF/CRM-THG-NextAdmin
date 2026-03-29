@@ -12,7 +12,7 @@ export function ListToolbar({
   current: ListQueryBase;
   sort: "newest" | "oldest";
 }) {
-  const q = { q: current.q, status: current.status };
+  const q = { q: current.q, status: current.status, wp: current.wp };
   const newestHref = `${listPath}${buildListSearchParams(q, { sort: null, page: null })}`;
   const oldestHref = `${listPath}${buildListSearchParams(q, { sort: "oldest", page: null })}`;
 

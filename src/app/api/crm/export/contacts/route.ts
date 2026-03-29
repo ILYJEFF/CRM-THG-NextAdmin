@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
 
   const q = request.nextUrl.searchParams.get("q") ?? undefined;
   const status = request.nextUrl.searchParams.get("status") ?? undefined;
-  const where = contactWhere(q, status);
+  const wp = request.nextUrl.searchParams.get("wp") ?? undefined;
+  const where = contactWhere(q, status, wp);
 
   const contactSelect =
     gate.state === "ok" ? crmContactScalarSelect : crmContactScalarSelectLegacy;

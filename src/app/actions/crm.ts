@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import {
   normalizeClientStatus,
+  normalizeMarketingPipelineStage,
   normalizeTalentStatus,
   normalizeSubmissionStage,
   normalizeActivityType,
@@ -19,6 +20,33 @@ export async function updateContactStatus(id: string, status: string) {
     where: { id },
     data: { status: s },
   });
+  revalidatePath("/admin/contacts");
+  revalidatePath("/admin");
+  revalidatePath(`/admin/contacts/${id}`);
+}
+
+export async function updateContactMarketingPipelineStage(
+  id: string,
+  pipelineStage: string
+) {
+  const stage = normalizeMarketingPipelineStage(pipelineStage);
+  try {
+    await prisma.crmContact.update({
+      where: { id },
+      data: { pipelineStage: stage },
+    });
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2022"
+    ) {
+      console.warn(
+        "[updateContactMarketingPipelineStage] pipelineStage column missing; run prisma migrate deploy."
+      );
+      return;
+    }
+    throw e;
+  }
   revalidatePath("/admin/contacts");
   revalidatePath("/admin");
   revalidatePath(`/admin/contacts/${id}`);

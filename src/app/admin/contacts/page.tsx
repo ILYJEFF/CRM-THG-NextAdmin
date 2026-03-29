@@ -8,7 +8,10 @@ import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
 import { ContactStageTableCell } from "@/components/crm/ContactStageTableCell";
 import { ListToolbar } from "@/components/crm/ListToolbar";
 import { PaginationBar } from "@/components/crm/PaginationBar";
-import { CLIENT_LEAD_STATUSES } from "@/lib/crm/pipeline";
+import {
+  CLIENT_LEAD_STATUSES,
+  MARKETING_WEBSITE_PIPELINE_OPTIONS,
+} from "@/lib/crm/pipeline";
 import {
   buildListSearchParams,
   contactWhere,
@@ -30,6 +33,8 @@ import { loadContactJobDescriptionUrlMap } from "@/lib/crm/contact-job-descripti
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 import { ClickableTableRow } from "@/components/crm/ClickableTableRow";
 import { JdTableCell } from "@/components/crm/JdTableCell";
+import { ContactWebsitePipelineTableCell } from "@/components/crm/ContactWebsitePipelineTableCell";
+import { ContactWebsitePipelineSelect } from "@/components/crm/ContactWebsitePipelineSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -53,10 +58,11 @@ export default async function ContactsPage({
   const lq = listQueryFromSearchParams(searchParams);
   const q = lq.q;
   const status = lq.status;
+  const wp = lq.wp;
   const sort = parseSort(lq.sort);
   const page = parsePage(lq.page);
 
-  const where = contactWhere(q, status);
+  const where = contactWhere(q, status, wp);
   const orderBy = orderByCreatedAt(sort);
 
   const contactSelect =
@@ -90,7 +96,7 @@ export default async function ContactsPage({
     contacts.map((c) => c.id)
   );
 
-  const chipBase = { q, sort };
+  const chipBase = { q, sort, wp };
   const chips = [
     {
       href: `${LIST_PATH}${buildListSearchParams(chipBase, { status: null, page: null })}`,
@@ -107,9 +113,30 @@ export default async function ContactsPage({
     })),
   ];
 
+  const websiteChipBase = { q, sort, status };
+  const websiteChips = [
+    {
+      href: `${LIST_PATH}${buildListSearchParams(websiteChipBase, {
+        wp: null,
+        page: null,
+      })}`,
+      label: "All sites",
+      active: !wp,
+    },
+    ...MARKETING_WEBSITE_PIPELINE_OPTIONS.map((s) => ({
+      href: `${LIST_PATH}${buildListSearchParams(websiteChipBase, {
+        wp: s.value,
+        page: null,
+      })}`,
+      label: s.label,
+      active: wp === s.value,
+    })),
+  ];
+
   const exportParams = new URLSearchParams();
   if (q) exportParams.set("q", q);
   if (status) exportParams.set("status", status);
+  if (wp) exportParams.set("wp", wp);
   const exportQs = exportParams.toString();
   const exportHref = `/api/crm/export/contacts${exportQs ? `?${exportQs}` : ""}`;
 
@@ -137,6 +164,13 @@ export default async function ContactsPage({
       />
 
       <FilterChips chips={chips} />
+
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wider text-violet-900/80">
+          Website pipeline
+        </p>
+        <FilterChips chips={websiteChips} />
+      </div>
 
       <ul className="space-y-3 md:hidden">
         {contacts.length === 0 ? (
@@ -179,8 +213,12 @@ export default async function ContactsPage({
                   Open lead →
                 </p>
               </Link>
-              <div className="border-t border-zinc-200/80 bg-zinc-50/70 px-4 py-3">
+              <div className="space-y-4 border-t border-zinc-200/80 bg-zinc-50/70 px-4 py-3">
                 <ContactStatusSelect id={c.id} current={c.status} />
+                <ContactWebsitePipelineSelect
+                  id={c.id}
+                  current={c.pipelineStage}
+                />
               </div>
             </li>
           ))
@@ -189,7 +227,7 @@ export default async function ContactsPage({
 
       <div className="hidden overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm md:block">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="w-full min-w-[860px] text-left text-sm">
             <thead>
               <tr className="border-b border-zinc-200 bg-zinc-50/90">
                 <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
@@ -211,7 +249,10 @@ export default async function ContactsPage({
                   JD
                 </th>
                 <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
-                  Pipeline
+                  Desk
+                </th>
+                <th className="whitespace-nowrap px-4 py-3 font-semibold text-violet-900">
+                  Website
                 </th>
               </tr>
             </thead>
@@ -219,7 +260,7 @@ export default async function ContactsPage({
               {contacts.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="px-4 py-12 text-center text-zinc-500"
                   >
                     No leads match this view.
@@ -262,6 +303,10 @@ export default async function ContactsPage({
                     </td>
                     <JdTableCell href={jdHref} />
                     <ContactStageTableCell id={c.id} current={c.status} />
+                    <ContactWebsitePipelineTableCell
+                      id={c.id}
+                      current={c.pipelineStage}
+                    />
                   </ClickableTableRow>
                 );
                 })

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatCrm } from "@/lib/crm/datetime";
 import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
+import { ContactWebsitePipelineSelect } from "@/components/crm/ContactWebsitePipelineSelect";
 import { LeadDangerZone } from "@/components/crm/LeadDangerZone";
 import { CrmActivitySection } from "@/components/crm/CrmActivitySection";
 import { ContactNotesForm } from "@/components/crm/ContactNotesForm";
@@ -94,7 +95,7 @@ export default async function ContactDetailPage({
       label: "Files",
       ...(jobDescriptionHref ? { badge: 1 } : {}),
     },
-    { id: "pipeline", label: "Pipeline" },
+    { id: "pipeline", label: "Stages" },
     {
       id: "activity",
       label: "Activity",
@@ -254,8 +255,8 @@ export default async function ContactDetailPage({
 
           <RecordTabPanel id="pipeline">
             <RecordSectionCard
-              title="Stage"
-              description="Move the lead through your pipeline. When the deal is real, convert to a client to unlock job orders and contracts."
+              title="Desk status"
+              description="Your recruiting desk state for this lead. When the deal is real, convert to a client to unlock job orders and contracts."
             >
               {clientId ? (
                 <div className="space-y-4">
@@ -274,6 +275,18 @@ export default async function ContactDetailPage({
                 <ContactStatusSelect id={contact.id} current={contact.status} />
               )}
             </RecordSectionCard>
+            <div className="mt-5">
+              <RecordSectionCard
+                title="Website pipeline"
+                description="Matches the marketing site admin spreadsheet. Change it here when you are working from the desk."
+                variant="emphasis"
+              >
+                <ContactWebsitePipelineSelect
+                  id={contact.id}
+                  current={contact.pipelineStage}
+                />
+              </RecordSectionCard>
+            </div>
             <LeadDangerZone
               contactId={contact.id}
               clientId={clientId}

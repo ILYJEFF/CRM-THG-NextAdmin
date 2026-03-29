@@ -15,6 +15,28 @@ export function formatMarketingPipelineStageLabel(stage: string): string {
   return MARKETING_LEAD_PIPELINE_LABELS[key] ?? stage;
 }
 
+/** Ordered options for selects and filters (matches marketing admin spreadsheet). */
+export const MARKETING_WEBSITE_PIPELINE_OPTIONS = [
+  { value: "inbox", label: "Inbox" },
+  { value: "contacted", label: "Contacted" },
+  { value: "qualified", label: "Qualified" },
+  { value: "proposal", label: "Proposal" },
+  { value: "negotiation", label: "Negotiation" },
+  { value: "closed_won", label: "Closed won" },
+  { value: "closed_lost", label: "Closed lost" },
+  { value: "on_hold", label: "On hold" },
+] as const;
+
+export type MarketingWebsitePipelineValue =
+  (typeof MARKETING_WEBSITE_PIPELINE_OPTIONS)[number]["value"];
+
+export function normalizeMarketingPipelineStage(raw: string): string {
+  const t = (raw.trim().toLowerCase() || "inbox").slice(0, 64);
+  return MARKETING_WEBSITE_PIPELINE_OPTIONS.some((o) => o.value === t)
+    ? t
+    : "inbox";
+}
+
 /** Client inquiry pipeline (employers / hiring leads from the site) */
 export const CLIENT_LEAD_STATUSES = [
   { value: "new", label: "New" },

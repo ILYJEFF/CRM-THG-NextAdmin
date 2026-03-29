@@ -20,7 +20,7 @@ export function ContactStageTableCell({
       onKeyDown={(e) => e.stopPropagation()}
     >
       <label className="sr-only" htmlFor={`stage-${id}`}>
-        Pipeline stage
+        Desk status
       </label>
       <select
         id={`stage-${id}`}

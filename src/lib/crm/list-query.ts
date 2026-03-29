@@ -16,7 +16,8 @@ export function buildListSearchParams(
 
 export function contactWhere(
   q?: string | null,
-  status?: string | null
+  status?: string | null,
+  websitePipeline?: string | null
 ): Prisma.CrmContactWhereInput {
   const parts: Prisma.CrmContactWhereInput[] = [];
   const trimmed = q?.trim();
@@ -41,6 +42,10 @@ export function contactWhere(
       status: { notIn: [...LEAD_LIST_EXCLUDED_STATUSES] },
     });
   }
+  const wp = websitePipeline?.trim();
+  if (wp) {
+    parts.push({ pipelineStage: wp });
+  }
   if (parts.length === 0) return {};
   if (parts.length === 1) return parts[0];
   return { AND: parts };
@@ -50,6 +55,8 @@ export function contactWhere(
 export type ListQueryBase = {
   q?: string;
   status?: string;
+  /** Website / marketing spreadsheet pipeline stage (inbox, proposal, …). */
+  wp?: string;
   sort?: string;
   page?: string;
 };
@@ -64,6 +71,7 @@ export function listQueryFromSearchParams(
   return {
     q: g("q"),
     status: g("status"),
+    wp: g("wp"),
     sort: g("sort"),
     page: g("page"),
   };

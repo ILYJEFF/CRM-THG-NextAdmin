@@ -18,12 +18,12 @@ export function ContactHeroPipelineStrip({
       ) : (
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-amber-900/80">
-            Pipeline
+            Desk status
           </p>
           <p className="text-sm leading-relaxed text-zinc-700">
             <span className="font-semibold text-zinc-900">Converted to client.</span>{" "}
             Job orders and contracts live in the client workspace. You can still
-            adjust stage on the Pipeline tab if needed.
+            adjust stage on the Stages tab if needed.
           </p>
         </div>
       )}
