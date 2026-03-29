@@ -1,10 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { resolveDatabaseUrl } from "@/lib/database-url";
+import { applyServerlessDbUrl, resolveDatabaseUrl } from "@/lib/database-url";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createClient() {
-  const url = resolveDatabaseUrl();
+  const raw = resolveDatabaseUrl();
+  const url = raw ? applyServerlessDbUrl(raw) : undefined;
   if (!url) {
     throw new Error(
       "Missing database connection string. Set DATABASE_URL on Vercel, or POSTGRES_PRISMA_URL / POSTGRES_URL from the Supabase or Vercel Postgres integration."
