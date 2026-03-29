@@ -38,13 +38,56 @@ model CrmClient {
   city            String
   industry        String?
   internalNotes   String?
+  /// e.g. retained, container, project, hourly
+  engagementType  String?
+  feeSummary      String?              @db.Text
+  warrantySummary String?              @db.Text
+  commercialNotes String?              @db.Text
+  agreementRenewalAt DateTime?
+  nextReviewAt    DateTime?
+  lastReviewAt    DateTime?
   convertedLead   CrmContact?
   jobOrders       CrmJobOrder[]
   contracts       CrmClientContract[]
+  accountTasks    CrmAccountTask[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
 
+  @@index([nextReviewAt])
   @@map("crm_clients")
+}
+
+/// Editable desk reference (fees, warranty, ops). Rendered on /admin/playbook.
+model CrmPlaybookSection {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  eyebrow   String   @default("")
+  title     String
+  sortOrder Int      @default(0)
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sortOrder])
+  @@map("crm_playbook_sections")
+}
+
+/// Per-client maintenance and follow-up tasks (not the same as CrmActivity).
+model CrmAccountTask {
+  id          String    @id @default(cuid())
+  clientId    String
+  client      CrmClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title       String
+  description String?   @db.Text
+  dueAt       DateTime?
+  completedAt DateTime?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([clientId])
+  @@index([clientId, completedAt])
+  @@map("crm_account_tasks")
 }
 
 model CrmJobOrder {

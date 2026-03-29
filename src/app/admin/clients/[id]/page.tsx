@@ -21,6 +21,11 @@ import {
   RecordTabPanel,
 } from "@/components/crm/RecordEntityTabs";
 import { RecordSectionCard } from "@/components/crm/RecordSectionCard";
+import { ClientCommercialPanel } from "@/components/crm/ClientCommercialPanel";
+import {
+  ClientAccountTasksPanel,
+  type AccountTaskRow,
+} from "@/components/crm/ClientAccountTasksPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +55,7 @@ export default async function ClientDetailPage({
     include: {
       jobOrders: { orderBy: { createdAt: "desc" } },
       contracts: { orderBy: { createdAt: "desc" } },
+      accountTasks: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
     },
   });
 
@@ -82,9 +88,23 @@ export default async function ClientDetailPage({
 
   const jobsCount = client.jobOrders.length;
   const contractsCount = client.contracts.length;
+  const openTaskCount = client.accountTasks.filter((t) => !t.completedAt).length;
+
+  const taskRows: AccountTaskRow[] = client.accountTasks.map((t) => ({
+    id: t.id,
+    title: t.title,
+    description: t.description,
+    dueAt: t.dueAt,
+    completedAt: t.completedAt,
+  }));
 
   const tabDefs = [
     { id: "overview", label: "Overview" },
+    {
+      id: "commercial",
+      label: "Commercial & care",
+      ...(openTaskCount > 0 ? { badge: openTaskCount } : {}),
+    },
     {
       id: "jobs",
       label: "Job orders",
@@ -134,12 +154,12 @@ export default async function ClientDetailPage({
           href="/admin/playbook#accounts"
           className="font-semibold text-violet-900 hover:underline"
         >
-          Account maintenance playbook
+          Desk playbook
         </Link>
         <span className="text-zinc-600">
           {" "}
-          Fee framing, warranty reminders, and quarterly care. Confirm against
-          signed agreements before quoting.
+          Editable reference for fees, warranty language, and account rhythm. Use
+          Commercial &amp; care for this client&apos;s specific terms.
         </span>
       </aside>
 
@@ -211,6 +231,37 @@ export default async function ClientDetailPage({
                 </li>
                 <li>Store signed documents under Contracts for quick retrieval.</li>
               </ul>
+            </RecordSectionCard>
+          </RecordTabPanel>
+
+          <RecordTabPanel id="commercial">
+            <RecordSectionCard
+              title="Commercial profile"
+              description="Engagement type, fee and warranty summaries, renewal dates, and review cadence. Pair with Contracts for the signed PDFs."
+              variant="emphasis"
+            >
+              <ClientCommercialPanel
+                clientId={client.id}
+                initial={{
+                  engagementType: client.engagementType,
+                  feeSummary: client.feeSummary,
+                  warrantySummary: client.warrantySummary,
+                  commercialNotes: client.commercialNotes,
+                  agreementRenewalAt: client.agreementRenewalAt,
+                  nextReviewAt: client.nextReviewAt,
+                  lastReviewAt: client.lastReviewAt,
+                }}
+              />
+            </RecordSectionCard>
+
+            <RecordSectionCard
+              title="Account maintenance tasks"
+              description="Renewals, QBR prep, contract follow-ups. Separate from the Activity log so nothing slips through."
+            >
+              <ClientAccountTasksPanel
+                clientId={client.id}
+                tasks={taskRows}
+              />
             </RecordSectionCard>
           </RecordTabPanel>
 

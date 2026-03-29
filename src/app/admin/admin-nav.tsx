@@ -52,6 +52,7 @@ export function AdminNav() {
       <NavGroup label="Workspace">
         <NavLink href="/admin">Recruiting desk</NavLink>
         <NavLink href="/admin/playbook">Desk playbook</NavLink>
+        <NavLink href="/admin/playbook/manage">Playbook CMS</NavLink>
       </NavGroup>
       <NavGroup label="Pipeline">
         <NavLink href="/admin/contacts">Client leads</NavLink>

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import {
@@ -113,18 +114,35 @@ export async function convertContactToClient(
       return { ok: false, error: "This lead is already linked to a client." };
     }
 
+    const reviewDue = new Date();
+    reviewDue.setDate(reviewDue.getDate() + 90);
+
+    const baseClientData = {
+      companyName: c.companyName,
+      contactName: c.contactName,
+      email: c.email,
+      phone: c.phone,
+      city: c.city,
+      industry: c.industry,
+      internalNotes: c.notes,
+    };
+
     const client = await prisma.$transaction(async (tx) => {
-      const cl = await tx.crmClient.create({
-        data: {
-          companyName: c.companyName,
-          contactName: c.contactName,
-          email: c.email,
-          phone: c.phone,
-          city: c.city,
-          industry: c.industry,
-          internalNotes: c.notes,
-        },
-      });
+      let cl;
+      try {
+        cl = await tx.crmClient.create({
+          data: { ...baseClientData, nextReviewAt: reviewDue },
+        });
+      } catch (e) {
+        if (
+          e instanceof Prisma.PrismaClientKnownRequestError &&
+          e.code === "P2022"
+        ) {
+          cl = await tx.crmClient.create({ data: baseClientData });
+        } else {
+          throw e;
+        }
+      }
       await tx.crmContact.update({
         where: { id: contactId },
         data: { clientId: cl.id, status: "converted" },

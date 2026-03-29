@@ -111,6 +111,83 @@ export default async function AdminHomePage() {
       })
     : [];
 
+  type DeskTaskRow = {
+    id: string;
+    title: string;
+    dueAt: Date | null;
+    client: { id: string; companyName: string | null; contactName: string };
+  };
+  let deskOverdueTasks: DeskTaskRow[] = [];
+  let deskUpcomingTasks: DeskTaskRow[] = [];
+  let deskReviewsDue: {
+    id: string;
+    companyName: string | null;
+    contactName: string;
+    nextReviewAt: Date;
+  }[] = [];
+
+  if (gate.state === "ok") {
+    try {
+      const startToday = new Date();
+      startToday.setHours(0, 0, 0, 0);
+      const horizon = new Date();
+      horizon.setDate(horizon.getDate() + 14);
+      horizon.setHours(23, 59, 59, 999);
+
+      const [overdue, upcoming, reviews] = await Promise.all([
+        prisma.crmAccountTask.findMany({
+          where: {
+            completedAt: null,
+            dueAt: { not: null, lt: startToday },
+          },
+          orderBy: { dueAt: "asc" },
+          take: 14,
+          include: {
+            client: {
+              select: { id: true, companyName: true, contactName: true },
+            },
+          },
+        }),
+        prisma.crmAccountTask.findMany({
+          where: {
+            completedAt: null,
+            dueAt: { not: null, gte: startToday, lte: horizon },
+          },
+          orderBy: { dueAt: "asc" },
+          take: 14,
+          include: {
+            client: {
+              select: { id: true, companyName: true, contactName: true },
+            },
+          },
+        }),
+        prisma.crmClient.findMany({
+          where: { nextReviewAt: { not: null, lte: horizon } },
+          orderBy: { nextReviewAt: "asc" },
+          take: 14,
+          select: {
+            id: true,
+            companyName: true,
+            contactName: true,
+            nextReviewAt: true,
+          },
+        }),
+      ]);
+      deskOverdueTasks = overdue;
+      deskUpcomingTasks = upcoming;
+      deskReviewsDue = reviews
+        .filter((r) => r.nextReviewAt)
+        .map((r) => ({
+          id: r.id,
+          companyName: r.companyName,
+          contactName: r.contactName,
+          nextReviewAt: r.nextReviewAt as Date,
+        }));
+    } catch {
+      /* Desk migration not applied yet */
+    }
+  }
+
   function activityRecordHref(a: { entityType: string; entityId: string }) {
     if (a.entityType === "contact") {
       return `/admin/contacts/${a.entityId}`;
@@ -188,8 +265,134 @@ export default async function AdminHomePage() {
               Desk playbook
             </Link>
           </li>
+          <li>
+            <Link
+              href="/admin/playbook/manage"
+              className="inline-flex min-h-10 items-center rounded-full bg-white px-4 text-sm font-semibold text-violet-900 ring-1 ring-violet-200 transition hover:bg-violet-50/80"
+            >
+              Playbook CMS
+            </Link>
+          </li>
         </ul>
       </section>
+
+      {gate.state === "ok" ? (
+        <section className="rounded-2xl border-2 border-violet-200/70 bg-gradient-to-br from-violet-50/90 via-white to-amber-50/40 p-4 shadow-md md:p-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-violet-900">
+                Account care command center
+              </h2>
+              <p className="mt-1 max-w-2xl text-sm text-zinc-600">
+                Maintenance tasks and scheduled client reviews in the next two
+                weeks. Overdue tasks surface first.
+              </p>
+            </div>
+            <Link
+              href="/admin/playbook/manage"
+              className="shrink-0 text-sm font-semibold text-violet-900 hover:underline"
+            >
+              Edit playbook →
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            <div className="rounded-2xl border border-red-200/80 bg-white/90 p-4 shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-red-800">
+                Overdue tasks ({deskOverdueTasks.length})
+              </h3>
+              <ul className="mt-3 space-y-2">
+                {deskOverdueTasks.length === 0 ? (
+                  <li className="text-sm text-zinc-500">None. Nice work.</li>
+                ) : (
+                  deskOverdueTasks.map((t) => (
+                    <li key={t.id}>
+                      <Link
+                        href={`/admin/clients/${t.client.id}`}
+                        className="block rounded-xl border border-red-100 bg-red-50/50 px-3 py-2 text-sm transition hover:bg-red-50"
+                      >
+                        <span className="font-medium text-zinc-900">
+                          {t.title}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-red-800">
+                          {t.client.companyName || t.client.contactName}
+                          {t.dueAt
+                            ? ` · was due ${formatCrm(t.dueAt, "MMM d")}`
+                            : ""}
+                        </span>
+                      </Link>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-amber-200/80 bg-white/90 p-4 shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                Due soon ({deskUpcomingTasks.length})
+              </h3>
+              <ul className="mt-3 space-y-2">
+                {deskUpcomingTasks.length === 0 ? (
+                  <li className="text-sm text-zinc-500">
+                    No tasks due in the next 14 days.
+                  </li>
+                ) : (
+                  deskUpcomingTasks.map((t) => (
+                    <li key={t.id}>
+                      <Link
+                        href={`/admin/clients/${t.client.id}`}
+                        className="block rounded-xl border border-amber-100 bg-amber-50/40 px-3 py-2 text-sm transition hover:bg-amber-50/80"
+                      >
+                        <span className="font-medium text-zinc-900">
+                          {t.title}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-amber-900">
+                          {t.client.companyName || t.client.contactName}
+                          {t.dueAt
+                            ? ` · ${formatCrm(t.dueAt, "MMM d")}`
+                            : ""}
+                        </span>
+                      </Link>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-200/80 bg-white/90 p-4 shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-900">
+                Client reviews ({deskReviewsDue.length})
+              </h3>
+              <p className="mt-1 text-xs text-zinc-500">
+                Next review on or before two weeks out.
+              </p>
+              <ul className="mt-3 space-y-2">
+                {deskReviewsDue.length === 0 ? (
+                  <li className="text-sm text-zinc-500">
+                    No review dates in this window.
+                  </li>
+                ) : (
+                  deskReviewsDue.map((c) => (
+                    <li key={c.id}>
+                      <Link
+                        href={`/admin/clients/${c.id}`}
+                        className="block rounded-xl border border-emerald-100 bg-emerald-50/40 px-3 py-2 text-sm transition hover:bg-emerald-50/80"
+                      >
+                        <span className="font-medium text-zinc-900">
+                          {c.companyName || c.contactName}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-emerald-900">
+                          Review {formatCrm(c.nextReviewAt, "MMM d, yyyy")}
+                        </span>
+                      </Link>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <Link

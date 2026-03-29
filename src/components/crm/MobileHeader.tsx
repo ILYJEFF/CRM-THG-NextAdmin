@@ -12,6 +12,12 @@ function titleForPath(path: string): { title: string; back?: string } {
   if (path === "/admin/candidates") return { title: "Talent pipeline" };
   if (path === "/admin/companies") return { title: "Company accounts" };
   if (path === "/admin/playbook") return { title: "Desk playbook", back: "/admin" };
+  if (path === "/admin/playbook/manage")
+    return { title: "Playbook CMS", back: "/admin/playbook" };
+  if (path === "/admin/playbook/sections/new")
+    return { title: "New section", back: "/admin/playbook/manage" };
+  if (/^\/admin\/playbook\/sections\/.+\/edit$/.test(path))
+    return { title: "Edit section", back: "/admin/playbook/manage" };
   if (path.startsWith("/admin/clients/"))
     return { title: "Client", back: "/admin/clients" };
   if (path.startsWith("/admin/contacts/"))
