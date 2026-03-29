@@ -230,7 +230,7 @@ export default async function AdminHomePage() {
               href="/api/crm/export/contacts"
               className="inline-flex min-h-10 items-center rounded-full bg-zinc-900 px-4 text-sm font-semibold text-white ring-1 ring-zinc-900 transition hover:bg-zinc-800"
             >
-              Export client leads (CSV)
+              Export leads (CSV)
             </a>
           </li>
           <li>
@@ -400,7 +400,7 @@ export default async function AdminHomePage() {
           className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm transition active:scale-[0.99] hover:border-amber-300/80 hover:shadow-md"
         >
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            New client leads
+            New leads
           </p>
           <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
             {newContacts}
@@ -453,7 +453,7 @@ export default async function AdminHomePage() {
         </Link>
         <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Open client leads
+            Open leads
           </p>
           <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
             {contactTotal}
@@ -596,7 +596,7 @@ export default async function AdminHomePage() {
           <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm">
             {recentContacts.length === 0 ? (
               <li className="px-4 py-10 text-center text-sm text-zinc-500">
-                No open client leads yet.
+                No open leads yet.
               </li>
             ) : (
               recentContacts.map((c) => (

@@ -71,7 +71,7 @@ export default async function ContactsPage({
   if (gate.state === "db_error") {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold text-zinc-900">Client leads</h1>
+        <h1 className="text-2xl font-semibold text-zinc-900">Leads</h1>
         <p className="text-sm text-zinc-600">
           Leads cannot load until the database connection works. See the alert
           at the top of the page.
@@ -144,7 +144,7 @@ export default async function ContactsPage({
     <div className="space-y-5 md:space-y-6">
       <div className="hidden md:block">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
-          Client leads
+          Leads
         </h1>
         <p className="mt-2 text-sm text-zinc-600">
           Employers and hiring managers from your site. Showing{" "}

@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
 
 function titleForPath(path: string): { title: string; back?: string } {
   if (path === "/admin") return { title: "Recruiting desk" };
-  if (path === "/admin/contacts") return { title: "Client leads" };
+  if (path === "/admin/contacts") return { title: "Leads" };
   if (path === "/admin/clients") return { title: "Active clients" };
   if (path === "/admin/jobs") return { title: "Job orders" };
   if (path === "/admin/candidates") return { title: "Talent pipeline" };

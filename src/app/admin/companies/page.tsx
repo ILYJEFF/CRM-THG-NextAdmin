@@ -46,7 +46,7 @@ export default async function CompaniesPage() {
           Company accounts
         </h1>
         <p className="mt-2 text-sm text-zinc-600">
-          Grouped from open client lead forms that included a company name. Tap
+          Grouped from open lead forms that included a company name. Tap
           a row to search leads for that employer.
         </p>
       </div>

@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
   return new Response(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="thg-client-leads-${stamp}.csv"`,
+      "Content-Disposition": `attachment; filename="thg-leads-${stamp}.csv"`,
     },
   });
 }
