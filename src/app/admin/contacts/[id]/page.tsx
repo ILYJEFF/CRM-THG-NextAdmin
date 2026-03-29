@@ -9,8 +9,12 @@ import { StatusBadge } from "@/components/crm/StatusBadge";
 import { formatStatusLabel } from "@/lib/crm/pipeline";
 import { marketingAssetUrl } from "@/lib/crm/links";
 import { MarketingDocumentCard } from "@/components/crm/MarketingDocumentCard";
-import { crmContactScalarSelect } from "@/lib/crm/crm-contact-select";
+import {
+  crmContactScalarSelect,
+  crmContactScalarSelectLegacy,
+} from "@/lib/crm/crm-contact-select";
 import { loadContactJobDescriptionUrl } from "@/lib/crm/contact-job-description-url";
+import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -19,12 +23,32 @@ export default async function ContactDetailPage({
 }: {
   params: { id: string };
 }) {
+  const gate = await getCrmDbGate();
   const { id } = params;
+
+  if (gate.state === "db_error") {
+    return (
+      <div className="mx-auto max-w-2xl space-y-4 md:max-w-3xl">
+        <p className="text-sm text-zinc-600">
+          This lead cannot load until the database connection works.
+        </p>
+      </div>
+    );
+  }
+
+  const contactSelect =
+    gate.state === "ok" ? crmContactScalarSelect : crmContactScalarSelectLegacy;
+
   const contact = await prisma.crmContact.findUnique({
     where: { id },
-    select: crmContactScalarSelect,
+    select: contactSelect,
   });
   if (!contact) notFound();
+
+  const clientId: string | null =
+    gate.state === "ok" && "clientId" in contact
+      ? (contact.clientId as string | null)
+      : null;
 
   const jd = await loadContactJobDescriptionUrl(id);
   const jobDescriptionHref = marketingAssetUrl(jd);
@@ -124,14 +148,14 @@ export default async function ContactDetailPage({
       </section>
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
-        {contact.clientId ? (
+        {clientId ? (
           <div className="space-y-3">
             <p className="text-sm leading-relaxed text-zinc-600">
               This lead is a client. Job orders and contracts are tracked on the
               client profile.
             </p>
             <Link
-              href={`/admin/clients/${contact.clientId}`}
+              href={`/admin/clients/${clientId}`}
               className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500"
             >
               Open client profile
@@ -142,7 +166,11 @@ export default async function ContactDetailPage({
         )}
       </section>
 
-      <LeadDangerZone contactId={contact.id} clientId={contact.clientId} />
+      <LeadDangerZone
+        contactId={contact.id}
+        clientId={clientId}
+        clientsModuleReady={gate.state === "ok"}
+      />
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">

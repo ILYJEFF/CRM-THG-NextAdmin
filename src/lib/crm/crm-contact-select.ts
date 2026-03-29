@@ -21,6 +21,26 @@ export const crmContactScalarSelect = {
   updatedAt: true,
 } satisfies Prisma.CrmContactSelect;
 
+/** Use when `crm_contacts.clientId` (clients module) is not migrated yet. */
+export const crmContactScalarSelectLegacy = {
+  id: true,
+  companyName: true,
+  contactName: true,
+  email: true,
+  phone: true,
+  city: true,
+  industry: true,
+  message: true,
+  status: true,
+  notes: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.CrmContactSelect;
+
 export type CrmContactScalar = Prisma.CrmContactGetPayload<{
   select: typeof crmContactScalarSelect;
+}>;
+
+export type CrmContactScalarLegacy = Prisma.CrmContactGetPayload<{
+  select: typeof crmContactScalarSelectLegacy;
 }>;

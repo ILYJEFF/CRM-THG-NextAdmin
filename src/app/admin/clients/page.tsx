@@ -13,6 +13,8 @@ import {
   parseSort,
   totalPages,
 } from "@/lib/crm/pagination";
+import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
+import { ClientsModulePlaceholder } from "@/components/crm/ClientsModulePlaceholder";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +34,11 @@ export default async function ClientsPage({
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
+  const gate = await getCrmDbGate();
+  if (gate.state !== "ok") {
+    return <ClientsModulePlaceholder gate={gate} />;
+  }
+
   const lq = listQueryFromSearchParams(searchParams);
   const q = lq.q;
   const sort = parseSort(lq.sort);

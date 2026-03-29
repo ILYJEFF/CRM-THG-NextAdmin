@@ -1,9 +1,24 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 
 export const dynamic = "force-dynamic";
 
 export default async function CompaniesPage() {
+  const gate = await getCrmDbGate();
+  if (gate.state === "db_error") {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold text-zinc-900">
+          Company accounts
+        </h1>
+        <p className="text-sm text-zinc-600">
+          Data cannot load until the database connection works.
+        </p>
+      </div>
+    );
+  }
+
   const rows = await prisma.crmContact.findMany({
     where: { companyName: { not: null } },
     select: { companyName: true },

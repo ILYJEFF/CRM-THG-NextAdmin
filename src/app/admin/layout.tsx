@@ -1,14 +1,18 @@
 import { AdminNav } from "./admin-nav";
 import { MobileHeader } from "@/components/crm/MobileHeader";
 import { MobileTabBar } from "@/components/crm/MobileTabBar";
+import { CrmSchemaBanner } from "@/components/crm/CrmSchemaBanner";
+import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 
 const marketingDefault = "https://www.thehammittgroup.com";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const gate = await getCrmDbGate();
+
   const marketing = (
     process.env.NEXT_PUBLIC_MARKETING_URL || marketingDefault
   ).replace(/\/$/, "");
@@ -57,6 +61,7 @@ export default function AdminLayout({
           id="crm-main"
         >
           <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-5 sm:py-6 md:px-8 md:py-8">
+            <CrmSchemaBanner gate={gate} />
             {children}
           </div>
         </main>

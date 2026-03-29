@@ -9,6 +9,8 @@ import { DeleteJobOrderButton } from "@/components/crm/DeleteJobOrderButton";
 import { JobOrderPrioritySelect } from "@/components/crm/JobOrderPrioritySelect";
 import { JobOrderStatusSelect } from "@/components/crm/JobOrderStatusSelect";
 import { isCrmS3Configured } from "@/lib/crm/s3-contracts";
+import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
+import { ClientsModulePlaceholder } from "@/components/crm/ClientsModulePlaceholder";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,11 @@ export default async function ClientDetailPage({
 }: {
   params: { id: string };
 }) {
+  const gate = await getCrmDbGate();
+  if (gate.state !== "ok") {
+    return <ClientsModulePlaceholder gate={gate} />;
+  }
+
   const { id } = params;
 
   const client = await prisma.crmClient.findUnique({

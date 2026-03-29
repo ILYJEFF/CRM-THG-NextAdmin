@@ -10,9 +10,12 @@ import {
 export function LeadDangerZone({
   contactId,
   clientId,
+  clientsModuleReady = true,
 }: {
   contactId: string;
   clientId: string | null;
+  /** When false, convert/delete are hidden until DB has clients module. */
+  clientsModuleReady?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -20,6 +23,28 @@ export function LeadDangerZone({
   const [message, setMessage] = useState<string | null>(null);
 
   const hasClient = Boolean(clientId);
+
+  if (!clientsModuleReady) {
+    return (
+      <section className="rounded-2xl border border-zinc-200/90 bg-zinc-50/80 p-5 shadow-sm ring-1 ring-zinc-100">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Actions
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-zinc-600">
+          Convert and delete require the clients database update (see the yellow
+          alert). After you run{" "}
+          <code className="rounded bg-zinc-200/80 px-1 py-0.5 text-xs">
+            prisma db push
+          </code>{" "}
+          or{" "}
+          <code className="rounded bg-zinc-200/80 px-1 py-0.5 text-xs">
+            add_clients_module.sql
+          </code>
+          , refresh this page.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm ring-1 ring-zinc-100">

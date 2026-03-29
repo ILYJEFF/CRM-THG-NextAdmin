@@ -21,8 +21,12 @@ import {
   totalPages,
 } from "@/lib/crm/pagination";
 import { marketingAssetUrl } from "@/lib/crm/links";
-import { crmContactScalarSelect } from "@/lib/crm/crm-contact-select";
+import {
+  crmContactScalarSelect,
+  crmContactScalarSelectLegacy,
+} from "@/lib/crm/crm-contact-select";
 import { loadContactJobDescriptionUrlMap } from "@/lib/crm/contact-job-description-url";
+import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +46,7 @@ export default async function ContactsPage({
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
+  const gate = await getCrmDbGate();
   const lq = listQueryFromSearchParams(searchParams);
   const q = lq.q;
   const status = lq.status;
@@ -50,6 +55,21 @@ export default async function ContactsPage({
 
   const where = contactWhere(q, status);
   const orderBy = orderByCreatedAt(sort);
+
+  const contactSelect =
+    gate.state === "ok" ? crmContactScalarSelect : crmContactScalarSelectLegacy;
+
+  if (gate.state === "db_error") {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold text-zinc-900">Client leads</h1>
+        <p className="text-sm text-zinc-600">
+          Leads cannot load until the database connection works. See the alert
+          at the top of the page.
+        </p>
+      </div>
+    );
+  }
 
   const total = await prisma.crmContact.count({ where });
   const pages = totalPages(total);
@@ -60,7 +80,7 @@ export default async function ContactsPage({
     orderBy,
     skip: (safePage - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
-    select: crmContactScalarSelect,
+    select: contactSelect,
   });
 
   const jdMap = await loadContactJobDescriptionUrlMap(

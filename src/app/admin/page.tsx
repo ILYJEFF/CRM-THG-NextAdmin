@@ -8,11 +8,34 @@ import {
   TALENT_STATUSES,
 } from "@/lib/crm/pipeline";
 import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
-import { crmContactScalarSelect } from "@/lib/crm/crm-contact-select";
+import {
+  crmContactScalarSelect,
+  crmContactScalarSelectLegacy,
+} from "@/lib/crm/crm-contact-select";
+import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminHomePage() {
+  const gate = await getCrmDbGate();
+
+  if (gate.state === "db_error") {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
+          Recruiting desk
+        </h1>
+        <p className="max-w-xl text-sm leading-relaxed text-zinc-600">
+          Stats and lists load from Postgres. Fix the connection (see the alert
+          above), then refresh this page.
+        </p>
+      </div>
+    );
+  }
+
+  const contactSelect =
+    gate.state === "ok" ? crmContactScalarSelect : crmContactScalarSelectLegacy;
+
   const [
     contactTotal,
     clientTotal,
@@ -26,7 +49,7 @@ export default async function AdminHomePage() {
     companyNameRows,
   ] = await Promise.all([
     prisma.crmContact.count(),
-    prisma.crmClient.count(),
+    gate.state === "ok" ? prisma.crmClient.count() : Promise.resolve(0),
     prisma.crmCandidate.count(),
     prisma.crmContact.count({ where: { status: "new" } }),
     prisma.crmCandidate.count({ where: { status: "new" } }),
@@ -39,7 +62,7 @@ export default async function AdminHomePage() {
       _count: true,
     }),
     prisma.crmContact.findMany({
-      select: crmContactScalarSelect,
+      select: contactSelect,
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
