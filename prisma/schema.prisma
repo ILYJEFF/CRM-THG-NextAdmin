@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CrmContact {
+  id          String   @id @default(cuid())
+  companyName String?
+  contactName String
+  email       String
+  phone       String
+  city        String
+  industry    String?
+  message     String
+  status      String   @default("new")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("crm_contacts")
+}
+
+model CrmCandidate {
+  id              String   @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  currentLocation String
+  desiredLocation String
+  industry        String
+  positionType    String
+  resumeUrl       String?
+  coverLetter     String?
+  status          String   @default("new")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("crm_candidates")
+}
