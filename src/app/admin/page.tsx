@@ -39,6 +39,7 @@ import {
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 import { loadContactJobDescriptionUrlMap } from "@/lib/crm/contact-job-description-url";
 import { marketingAssetUrl } from "@/lib/crm/links";
+import { AddClientPanel } from "@/components/crm/AddClientPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -283,6 +284,10 @@ export default async function AdminDeskPage({
           current={navQuery}
           sort={sort}
         />
+
+        {gate.state === "ok" && (view === "clients" || view === "all") ? (
+          <AddClientPanel />
+        ) : null}
 
         {chips.length > 0 ? (
           <div className="rounded-xl border border-zinc-200/60 bg-zinc-50/30 px-2 py-2.5 md:px-3 md:py-3">

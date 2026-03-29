@@ -221,6 +221,100 @@ export async function convertContactToClient(
   }
 }
 
+const manualClientSchema = z.object({
+  contactName: z.string().trim().min(1, "Contact name is required").max(200),
+  email: z.string().trim().email("Valid email required").max(320),
+  phone: z.string().trim().min(1, "Phone is required").max(64),
+  city: z.string().trim().min(1, "City is required").max(120),
+  companyName: z.string().trim().max(200).optional(),
+  industry: z.string().trim().max(200).optional(),
+  engagementType: z.string().trim().max(120).optional(),
+  internalNotes: z.string().trim().max(16000).optional(),
+});
+
+function optionalTrimmed(s: string | undefined) {
+  const t = s?.trim();
+  return t ? t : null;
+}
+
+/** Create a client record with no linked lead (manual entry on Desk). */
+export async function createClientManual(raw: {
+  contactName: string;
+  email: string;
+  phone: string;
+  city: string;
+  companyName?: string;
+  industry?: string;
+  engagementType?: string;
+  internalNotes?: string;
+}): Promise<{ ok: true; clientId: string } | { ok: false; error: string }> {
+  const user = await getCrmSessionUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to add a client." };
+  }
+
+  const parsed = manualClientSchema.safeParse({
+    contactName: raw.contactName,
+    email: raw.email,
+    phone: raw.phone,
+    city: raw.city,
+    companyName: raw.companyName?.trim() || undefined,
+    industry: raw.industry?.trim() || undefined,
+    engagementType: raw.engagementType?.trim() || undefined,
+    internalNotes: raw.internalNotes?.trim() || undefined,
+  });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const p = parsed.data;
+  const reviewDue = new Date();
+  reviewDue.setDate(reviewDue.getDate() + 90);
+
+  const base = {
+    contactName: p.contactName,
+    email: p.email,
+    phone: p.phone,
+    city: p.city,
+    companyName: optionalTrimmed(p.companyName ?? undefined),
+    industry: optionalTrimmed(p.industry ?? undefined),
+    engagementType: optionalTrimmed(p.engagementType ?? undefined),
+    internalNotes: optionalTrimmed(p.internalNotes ?? undefined),
+  };
+
+  try {
+    let row;
+    try {
+      row = await prisma.crmClient.create({
+        data: { ...base, nextReviewAt: reviewDue },
+      });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === "P2022"
+      ) {
+        row = await prisma.crmClient.create({ data: base });
+      } else {
+        throw e;
+      }
+    }
+    revalidatePath("/admin");
+    return { ok: true, clientId: row.id };
+  } catch (e) {
+    console.error("[createClientManual]", e);
+    return {
+      ok: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "Could not create client. Confirm crm_clients exists and you are on the latest schema.",
+    };
+  }
+}
+
 export async function deleteContactLead(
   id: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
