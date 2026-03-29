@@ -7,6 +7,7 @@ import {
   CLIENT_LEAD_STATUSES,
   TALENT_STATUSES,
 } from "@/lib/crm/pipeline";
+import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,7 @@ export default async function AdminHomePage() {
       take: 5,
     }),
     prisma.crmCandidate.findMany({
+      select: crmCandidateScalarSelect,
       orderBy: { createdAt: "desc" },
       take: 5,
     }),

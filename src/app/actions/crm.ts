@@ -39,12 +39,24 @@ export async function updateCandidateStatus(id: string, status: string) {
   revalidatePath(`/admin/candidates/${id}`);
 }
 
-export async function updateCandidateNotes(id: string, notes: string) {
+export async function updateCandidateNotes(
+  id: string,
+  notes: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const n = notes.slice(0, 8000);
-  await prisma.crmCandidate.update({
-    where: { id },
-    data: { notes: n || null },
-  });
+  try {
+    await prisma.crmCandidate.update({
+      where: { id },
+      data: { notes: n || null },
+    });
+  } catch {
+    return {
+      ok: false,
+      error:
+        "Notes could not be saved. Add the notes column to crm_candidates (see prisma/sql/add_candidate_notes.sql) or run prisma db push.",
+    };
+  }
   revalidatePath("/admin/candidates");
   revalidatePath(`/admin/candidates/${id}`);
+  return { ok: true };
 }

@@ -6,6 +6,8 @@ import { CandidateNotesForm } from "@/components/crm/CandidateNotesForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
 import { formatStatusLabel } from "@/lib/crm/pipeline";
 import { marketingResumeUrl } from "@/lib/crm/links";
+import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
+import { loadCandidateNotes } from "@/lib/crm/candidate-notes";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +17,13 @@ export default async function CandidateDetailPage({
   params: { id: string };
 }) {
   const { id } = params;
-  const c = await prisma.crmCandidate.findUnique({ where: { id } });
+  const c = await prisma.crmCandidate.findUnique({
+    where: { id },
+    select: crmCandidateScalarSelect,
+  });
   if (!c) notFound();
+
+  const notes = await loadCandidateNotes(id);
 
   const resumeHref = marketingResumeUrl(c.resumeUrl);
 
@@ -141,7 +148,7 @@ export default async function CandidateDetailPage({
       ) : null}
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
-        <CandidateNotesForm id={c.id} initial={c.notes} />
+        <CandidateNotesForm id={c.id} initial={notes} />
       </section>
 
       <p className="px-1 text-center text-xs text-zinc-400">

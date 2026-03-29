@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { getCrmSessionUser } from "@/lib/crm/auth-crm";
 import { candidateWhere } from "@/lib/crm/list-query";
 import { toCsvRow } from "@/lib/crm/csv";
+import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
+import { loadCandidateNotesMap } from "@/lib/crm/candidate-notes";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +20,12 @@ export async function GET(request: NextRequest) {
 
   const rows = await prisma.crmCandidate.findMany({
     where,
+    select: crmCandidateScalarSelect,
     orderBy: { createdAt: "desc" },
     take: 10000,
   });
+
+  const notesById = await loadCandidateNotesMap(rows.map((r) => r.id));
 
   const header = [
     "id",
@@ -52,7 +57,7 @@ export async function GET(request: NextRequest) {
       r.industry,
       r.positionType,
       r.status,
-      r.notes ?? "",
+      notesById.get(r.id) ?? "",
       r.resumeUrl ?? "",
       r.createdAt.toISOString(),
       r.updatedAt.toISOString(),

@@ -21,6 +21,7 @@ import {
   totalPages,
 } from "@/lib/crm/pagination";
 import { marketingResumeUrl } from "@/lib/crm/links";
+import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,7 @@ export default async function CandidatesPage({
 
   const candidates = await prisma.crmCandidate.findMany({
     where,
+    select: crmCandidateScalarSelect,
     orderBy,
     skip: (safePage - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
