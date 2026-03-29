@@ -6,6 +6,7 @@ import {
   saveJobOrderCareerDraft,
   syncJobOrderCareerPosting,
 } from "@/app/actions/crm";
+import { formatCrm } from "@/lib/crm/datetime";
 
 const EMPLOYMENT = [
   { value: "FULL_TIME", label: "Full time" },
@@ -133,7 +134,7 @@ export function JobOrderCareerPanel({
       {initial.careerPublishedAt ? (
         <p className="text-xs text-emerald-800">
           Live on site · last published{" "}
-          {new Date(initial.careerPublishedAt).toLocaleString()}
+          {formatCrm(initial.careerPublishedAt, "MMM d, yyyy · h:mm a")}
         </p>
       ) : initial.careerSlug ? (
         <p className="text-xs text-amber-800">Saved as draft on marketing DB</p>

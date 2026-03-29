@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
+import { CRM_TIME_ZONE_LABEL, formatCrm } from "@/lib/crm/datetime";
 import { StatusBadge } from "@/components/crm/StatusBadge";
 import {
   formatStatusLabel,
@@ -138,7 +138,50 @@ export default async function AdminHomePage() {
           searches: publish to the career site, assign candidates, and keep
           contracts next to each account.
         </p>
+        <p className="mt-2 text-xs font-medium text-zinc-500">
+          Dates and times are shown in {CRM_TIME_ZONE_LABEL} (Chicago).
+        </p>
       </div>
+
+      <section className="rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-sm md:p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Quick actions
+        </h2>
+        <ul className="mt-3 flex flex-wrap gap-2">
+          <li>
+            <a
+              href="/api/crm/export/contacts"
+              className="inline-flex min-h-10 items-center rounded-full bg-zinc-900 px-4 text-sm font-semibold text-white ring-1 ring-zinc-900 transition hover:bg-zinc-800"
+            >
+              Export client leads (CSV)
+            </a>
+          </li>
+          <li>
+            <a
+              href="/api/crm/export/candidates"
+              className="inline-flex min-h-10 items-center rounded-full bg-white px-4 text-sm font-semibold text-zinc-800 ring-1 ring-zinc-200 transition hover:bg-zinc-50"
+            >
+              Export talent (CSV)
+            </a>
+          </li>
+          <li>
+            <Link
+              href="/admin/companies"
+              className="inline-flex min-h-10 items-center rounded-full bg-white px-4 text-sm font-semibold text-zinc-800 ring-1 ring-zinc-200 transition hover:bg-zinc-50"
+            >
+              Company accounts
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/admin/jobs"
+              className="inline-flex min-h-10 items-center rounded-full bg-white px-4 text-sm font-semibold text-zinc-800 ring-1 ring-zinc-200 transition hover:bg-zinc-50"
+            >
+              Job orders pipeline
+            </Link>
+          </li>
+        </ul>
+      </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <Link
@@ -314,7 +357,7 @@ export default async function AdminHomePage() {
                     dateTime={a.createdAt.toISOString()}
                     className="text-xs tabular-nums text-zinc-400"
                   >
-                    {format(a.createdAt, "MMM d, h:mm a")}
+                    {formatCrm(a.createdAt, "MMM d, h:mm a")}
                   </time>
                 </div>
                 <p className="mt-1 line-clamp-2 text-sm text-zinc-600">
@@ -363,7 +406,7 @@ export default async function AdminHomePage() {
                         label={formatStatusLabel(c.status, "client")}
                       />
                       <span className="text-xs text-zinc-500">
-                        {format(c.createdAt, "MMM d")}
+                        {formatCrm(c.createdAt, "MMM d")}
                       </span>
                     </div>
                   </Link>
@@ -411,7 +454,7 @@ export default async function AdminHomePage() {
                         label={formatStatusLabel(c.status, "talent")}
                       />
                       <span className="text-xs text-zinc-500">
-                        {format(c.createdAt, "MMM d")}
+                        {formatCrm(c.createdAt, "MMM d")}
                       </span>
                     </div>
                   </Link>

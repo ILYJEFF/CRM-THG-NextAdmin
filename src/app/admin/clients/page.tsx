@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
+import { formatCrm } from "@/lib/crm/datetime";
 import { SearchForm } from "@/components/crm/SearchForm";
 import { ListToolbar } from "@/components/crm/ListToolbar";
 import { PaginationBar } from "@/components/crm/PaginationBar";
@@ -15,6 +15,7 @@ import {
 } from "@/lib/crm/pagination";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 import { ClientsModulePlaceholder } from "@/components/crm/ClientsModulePlaceholder";
+import { ClickableTableRow } from "@/components/crm/ClickableTableRow";
 
 export const dynamic = "force-dynamic";
 
@@ -118,7 +119,7 @@ export default async function ClientsPage({
                   </span>
                 </p>
                 <p className="mt-3 text-xs text-zinc-400">
-                  Since {format(c.createdAt, "MMM d, yyyy")}
+                  Since {formatCrm(c.createdAt, "MMM d, yyyy")}
                 </p>
               </Link>
             </li>
@@ -163,17 +164,14 @@ export default async function ClientsPage({
                 </tr>
               ) : (
                 clients.map((c) => (
-                  <tr
+                  <ClickableTableRow
                     key={c.id}
-                    className="transition hover:bg-amber-50/40"
+                    href={`/admin/clients/${c.id}`}
                   >
                     <td className="px-4 py-3 align-top">
-                      <Link
-                        href={`/admin/clients/${c.id}`}
-                        className="font-medium text-zinc-900 hover:text-amber-900 hover:underline"
-                      >
+                      <span className="font-medium text-zinc-900">
                         {c.contactName}
-                      </Link>
+                      </span>
                       {c.companyName ? (
                         <span className="mt-0.5 block text-xs text-zinc-500">
                           {c.companyName}
@@ -193,9 +191,9 @@ export default async function ClientsPage({
                       {c._count.contracts}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 align-top text-zinc-500">
-                      {format(c.createdAt, "MMM d, yyyy")}
+                      {formatCrm(c.createdAt, "MMM d, yyyy")}
                     </td>
-                  </tr>
+                  </ClickableTableRow>
                 ))
               )}
             </tbody>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
+import { formatCrm } from "@/lib/crm/datetime";
 import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
 import { LeadDangerZone } from "@/components/crm/LeadDangerZone";
 import { CrmActivitySection } from "@/components/crm/CrmActivitySection";
@@ -181,7 +181,7 @@ export default async function ContactDetailPage({
           {contact.message}
         </p>
         <p className="mt-4 text-xs text-zinc-400">
-          Submitted {format(contact.createdAt, "MMMM d, yyyy 'at' h:mm a")}
+          Submitted {formatCrm(contact.createdAt, "MMMM d, yyyy 'at' h:mm a")}
         </p>
       </section>
 

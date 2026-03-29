@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
+import { formatCrm } from "@/lib/crm/datetime";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 import { ClientsModulePlaceholder } from "@/components/crm/ClientsModulePlaceholder";
 import {
@@ -174,7 +174,7 @@ export default async function JobsPipelinePage({
                     </Link>
                   </div>
                   <p className="mt-2 text-xs text-zinc-400">
-                    Updated {format(j.updatedAt, "MMM d, yyyy")}
+                    Updated {formatCrm(j.updatedAt, "MMM d, yyyy")}
                   </p>
                 </article>
               </li>

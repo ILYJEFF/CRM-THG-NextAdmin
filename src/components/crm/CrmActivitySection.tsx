@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { formatCrm } from "@/lib/crm/datetime";
 import { prisma } from "@/lib/prisma";
 import { getActivitiesModuleReady } from "@/lib/crm/activities-module";
 import { formatActivityTypeLabel } from "@/lib/crm/pipeline";
@@ -70,7 +70,7 @@ export async function CrmActivitySection({
                   dateTime={a.createdAt.toISOString()}
                   className="text-xs tabular-nums text-zinc-400"
                 >
-                  {format(a.createdAt, "MMM d, yyyy · h:mm a")}
+                  {formatCrm(a.createdAt, "MMM d, yyyy · h:mm a")}
                 </time>
               </div>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
+import { formatCrm } from "@/lib/crm/datetime";
 import { ClientInternalNotesForm } from "@/components/crm/ClientInternalNotesForm";
 import { ClientContractsPanel } from "@/components/crm/ClientContractsPanel";
 import { CreateJobOrderForm } from "@/components/crm/CreateJobOrderForm";
@@ -152,7 +152,7 @@ export default async function ClientDetailPage({
           ) : null}
         </dl>
         <p className="mt-4 text-xs text-zinc-400">
-          Client since {format(client.createdAt, "MMMM d, yyyy")}
+          Client since {formatCrm(client.createdAt, "MMMM d, yyyy")}
         </p>
       </section>
 
@@ -205,7 +205,7 @@ export default async function ClientDetailPage({
                       </p>
                     ) : null}
                     <p className="mt-3 text-xs text-zinc-400">
-                      Opened {format(j.createdAt, "MMM d, yyyy")}
+                      Opened {formatCrm(j.createdAt, "MMM d, yyyy")}
                     </p>
                   </div>
                   <DeleteJobOrderButton id={j.id} />

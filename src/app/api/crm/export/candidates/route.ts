@@ -5,6 +5,7 @@ import { candidateWhere } from "@/lib/crm/list-query";
 import { toCsvRow } from "@/lib/crm/csv";
 import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
 import { loadCandidateNotesMap } from "@/lib/crm/candidate-notes";
+import { formatCrm } from "@/lib/crm/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -59,8 +60,8 @@ export async function GET(request: NextRequest) {
       r.status,
       notesById.get(r.id) ?? "",
       r.resumeUrl ?? "",
-      r.createdAt.toISOString(),
-      r.updatedAt.toISOString(),
+      formatCrm(r.createdAt, "yyyy-MM-dd HH:mm:ss"),
+      formatCrm(r.updatedAt, "yyyy-MM-dd HH:mm:ss"),
     ]);
   }
 

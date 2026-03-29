@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, useTransition } from "react";
 import { addClientContractLink, deleteClientContract } from "@/app/actions/crm";
-import { format } from "date-fns";
+import { formatCrm } from "@/lib/crm/datetime";
 
 type ContractRow = {
   id: string;
@@ -186,7 +186,7 @@ export function ClientContractsPanel({
                 </p>
                 <p className="truncate text-xs text-zinc-500">{c.fileName}</p>
                 <p className="mt-1 text-xs text-zinc-400">
-                  Added {format(new Date(c.createdAt), "MMM d, yyyy")}
+                  Added {formatCrm(c.createdAt, "MMM d, yyyy")}
                 </p>
                 <a
                   href={c.fileUrl}

@@ -29,15 +29,38 @@ function NavLink({
   );
 }
 
+function NavGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1">
+      <p className="px-3 pb-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
+        {label}
+      </p>
+      <div className="space-y-0.5">{children}</div>
+    </div>
+  );
+}
+
 export function AdminNav() {
   return (
-    <>
-      <NavLink href="/admin">Recruiting desk</NavLink>
-      <NavLink href="/admin/contacts">Client leads</NavLink>
-      <NavLink href="/admin/clients">Active clients</NavLink>
-      <NavLink href="/admin/jobs">Job orders</NavLink>
-      <NavLink href="/admin/candidates">Talent pipeline</NavLink>
-      <NavLink href="/admin/companies">Company accounts</NavLink>
-    </>
+    <div className="flex flex-col gap-5">
+      <NavGroup label="Workspace">
+        <NavLink href="/admin">Recruiting desk</NavLink>
+      </NavGroup>
+      <NavGroup label="Pipeline">
+        <NavLink href="/admin/contacts">Client leads</NavLink>
+        <NavLink href="/admin/candidates">Talent pipeline</NavLink>
+        <NavLink href="/admin/jobs">Job orders</NavLink>
+      </NavGroup>
+      <NavGroup label="Accounts">
+        <NavLink href="/admin/clients">Active clients</NavLink>
+        <NavLink href="/admin/companies">Company accounts</NavLink>
+      </NavGroup>
+    </div>
   );
 }

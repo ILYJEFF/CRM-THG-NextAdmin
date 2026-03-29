@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
+import { formatCrm } from "@/lib/crm/datetime";
 import { FilterChips } from "@/components/crm/FilterChips";
 import { SearchForm } from "@/components/crm/SearchForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
@@ -22,6 +22,8 @@ import {
 } from "@/lib/crm/pagination";
 import { marketingResumeUrl } from "@/lib/crm/links";
 import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
+import { ClickableTableRow } from "@/components/crm/ClickableTableRow";
+import { JdTableCell } from "@/components/crm/JdTableCell";
 
 export const dynamic = "force-dynamic";
 
@@ -136,7 +138,7 @@ export default async function CandidatesPage({
                         Wants {c.desiredLocation} · from {c.currentLocation}
                       </p>
                       <p className="mt-2 truncate text-xs text-zinc-400">
-                        {format(c.createdAt, "MMM d, yyyy")}
+                        {formatCrm(c.createdAt, "MMM d, yyyy")}
                       </p>
                     </div>
                     <StatusBadge
@@ -200,23 +202,20 @@ export default async function CandidatesPage({
                 candidates.map((c) => {
                   const resumeHref = marketingResumeUrl(c.resumeUrl);
                   return (
-                    <tr
+                    <ClickableTableRow
                       key={c.id}
-                      className="transition hover:bg-amber-50/40"
+                      href={`/admin/candidates/${c.id}`}
                     >
                       <td className="whitespace-nowrap px-4 py-3 align-top text-zinc-600">
-                        {format(c.createdAt, "MMM d, yyyy")}
+                        {formatCrm(c.createdAt, "MMM d, yyyy")}
                         <span className="block text-xs text-zinc-400">
-                          {format(c.createdAt, "h:mm a")}
+                          {formatCrm(c.createdAt, "h:mm a")}
                         </span>
                       </td>
                       <td className="px-4 py-3 align-top">
-                        <Link
-                          href={`/admin/candidates/${c.id}`}
-                          className="font-medium text-zinc-900 hover:text-amber-900 hover:underline"
-                        >
+                        <span className="font-medium text-zinc-900">
                           {c.firstName} {c.lastName}
-                        </Link>
+                        </span>
                         <span className="mt-0.5 block break-all text-xs text-zinc-500">
                           {c.email}
                         </span>
@@ -236,27 +235,18 @@ export default async function CandidatesPage({
                         <span className="text-zinc-400">Based</span>{" "}
                         {c.currentLocation}
                       </td>
-                      <td className="px-4 py-3 align-top">
-                        {resumeHref ? (
-                          <a
-                            href={resumeHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-semibold text-amber-800 hover:underline"
-                          >
-                            Open file
-                          </a>
-                        ) : (
-                          <span className="text-zinc-400">—</span>
-                        )}
-                      </td>
+                      <JdTableCell
+                        href={resumeHref}
+                        label="Open file"
+                        linkClassName="text-amber-800"
+                      />
                       <td className="px-4 py-3 align-top">
                         <StatusBadge
                           status={c.status}
                           label={formatStatusLabel(c.status, "talent")}
                         />
                       </td>
-                    </tr>
+                    </ClickableTableRow>
                   );
                 })
               )}

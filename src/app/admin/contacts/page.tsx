@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
+import { formatCrm } from "@/lib/crm/datetime";
 import { FilterChips } from "@/components/crm/FilterChips";
 import { SearchForm } from "@/components/crm/SearchForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
@@ -163,7 +163,7 @@ export default async function ContactsPage({
                       {c.email}
                     </p>
                     <p className="mt-1 text-xs text-zinc-400">
-                      {c.city} · {format(c.createdAt, "MMM d, yyyy")}
+                      {c.city} · {formatCrm(c.createdAt, "MMM d, yyyy")}
                     </p>
                   </div>
                   <StatusBadge
@@ -236,9 +236,9 @@ export default async function ContactsPage({
                     href={`/admin/contacts/${c.id}`}
                   >
                     <td className="whitespace-nowrap px-4 py-3 align-top text-zinc-600">
-                      {format(c.createdAt, "MMM d, yyyy")}
+                      {formatCrm(c.createdAt, "MMM d, yyyy")}
                       <span className="block text-xs text-zinc-400">
-                        {format(c.createdAt, "h:mm a")}
+                        {formatCrm(c.createdAt, "h:mm a")}
                       </span>
                     </td>
                     <td className="px-4 py-3 align-top">

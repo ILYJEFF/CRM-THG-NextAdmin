@@ -9,6 +9,7 @@ import {
 } from "@/lib/crm/crm-contact-select";
 import { loadContactJobDescriptionUrlMap } from "@/lib/crm/contact-job-description-url";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
+import { formatCrm } from "@/lib/crm/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -78,8 +79,8 @@ export async function GET(request: NextRequest) {
     }
     cells.push(
       jdMap.get(r.id) ?? "",
-      r.createdAt.toISOString(),
-      r.updatedAt.toISOString()
+      formatCrm(r.createdAt, "yyyy-MM-dd HH:mm:ss"),
+      formatCrm(r.updatedAt, "yyyy-MM-dd HH:mm:ss")
     );
     csv += toCsvRow(cells);
   }

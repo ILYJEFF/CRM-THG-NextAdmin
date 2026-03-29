@@ -3,6 +3,7 @@ import { MobileHeader } from "@/components/crm/MobileHeader";
 import { MobileTabBar } from "@/components/crm/MobileTabBar";
 import { CrmSchemaBanner } from "@/components/crm/CrmSchemaBanner";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
+import { CRM_TIME_ZONE_LABEL } from "@/lib/crm/datetime";
 
 const marketingDefault = "https://www.thehammittgroup.com";
 
@@ -30,6 +31,9 @@ export default async function AdminLayout({
           <p className="mt-2 text-xs leading-relaxed text-zinc-500">
             Leads, active clients, job orders, contracts, and talent in one
             workspace.
+          </p>
+          <p className="mt-2 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+            Times · {CRM_TIME_ZONE_LABEL} (Chicago)
           </p>
         </div>
         <nav className="flex-1 space-y-1 p-3">

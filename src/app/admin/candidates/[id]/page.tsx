@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
+import { formatCrm } from "@/lib/crm/datetime";
 import { CandidateStatusSelect } from "@/components/crm/CandidateStatusSelect";
 import { CandidateNotesForm } from "@/components/crm/CandidateNotesForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
@@ -220,7 +220,7 @@ export default async function CandidateDetailPage({
       )}
 
       <p className="px-1 text-center text-xs text-zinc-400">
-        Applied {format(c.createdAt, "MMMM d, yyyy 'at' h:mm a")}
+        Applied {formatCrm(c.createdAt, "MMMM d, yyyy 'at' h:mm a")}
       </p>
     </div>
   );
