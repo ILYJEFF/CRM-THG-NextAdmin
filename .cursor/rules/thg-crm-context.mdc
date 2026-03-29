@@ -1,0 +1,18 @@
+---
+description: This repo is THG CRM; quick map for admin UI and server actions
+alwaysApply: true
+---
+
+# You are in the THG CRM repository
+
+Root: `thg-crm` (deploy target for `crm.thehammittgroup.com`).
+
+## Interaction map
+
+- **Leads list and detail**: `src/app/admin/contacts/page.tsx`, `src/app/admin/contacts/[id]/page.tsx`
+- **Mutations**: `src/app/actions/crm.ts` (prefer server actions + `revalidatePath`, not ad hoc fetch to nonexistent routes)
+- **Pipeline / stage UI**: `src/components/crm/ContactStatusSelect.tsx`; stage values and labels: `src/lib/crm/pipeline.ts`
+- **Hero / record chrome**: `src/components/crm/ContactRecordHero.tsx` and related `src/components/crm/*`
+- **Data model**: `prisma/schema.prisma` (`CrmContact`, `CrmClient`, etc.)
+
+The marketing site repo is separate (`thehammittgroup-website`). Sync from site forms uses integration routes under `src/app/api/integrations/`.
