@@ -2,21 +2,29 @@
  * Vercel serverless: each concurrent invocation should use at most one DB
  * connection through PgBouncer. Without this, parallel queries (or Promise.all)
  * can exhaust Prisma's pool and hit "Timed out fetching a new connection".
+ *
+ * Neon / Vercel URLs often already include `connection_limit=5` or similar.
+ * Those defaults must be overridden, or serverless invocations starve the pool.
  */
 export function applyServerlessDbUrl(url: string): string {
   if (process.env.NODE_ENV !== "production") return url;
   if (process.env.PRISMA_SERVERLESS_POOL_OFF === "1") return url;
 
-  const hasConnLimit = /[?&]connection_limit=\d+/.test(url);
-  const hasPoolTimeout = /[?&]pool_timeout=\d+/.test(url);
-  let next = url;
-  if (!hasConnLimit) {
-    next += (next.includes("?") ? "&" : "?") + "connection_limit=1";
+  try {
+    const u = new URL(url);
+    u.searchParams.set("connection_limit", "1");
+    u.searchParams.set("pool_timeout", "20");
+    return u.toString();
+  } catch {
+    const joiner = url.includes("?") ? "&" : "?";
+    const stripped = url
+      .replace(/([?&])connection_limit=\d+(&|$)/g, "$1")
+      .replace(/([?&])pool_timeout=\d+(&|$)/g, "$1")
+      .replace(/\?&/, "?")
+      .replace(/&&+/g, "&")
+      .replace(/[?&]$/, "");
+    return `${stripped}${joiner}connection_limit=1&pool_timeout=20`;
   }
-  if (!hasPoolTimeout) {
-    next += (next.includes("?") ? "&" : "?") + "pool_timeout=20";
-  }
-  return next;
 }
 
 /**
