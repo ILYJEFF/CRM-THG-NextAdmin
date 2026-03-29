@@ -150,3 +150,55 @@ model CrmActivity {
   @@index([createdAt])
   @@map("crm_activities")
 }
+
+/// Marketing-site email templates (submitter thank-yous, welcome, etc.). The
+/// public site loads these via /api/integrations/email-template with a shared secret.
+model CrmMarketingEmailTemplate {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  subject     String
+  htmlBody    String   @db.Text
+  description String?
+  variables   String?
+  category    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([isActive])
+  @@map("crm_marketing_email_templates")
+}
+
+model CrmNurtureCampaign {
+  id          String                     @id @default(cuid())
+  name        String
+  description String?                    @db.Text
+  isActive    Boolean                    @default(true)
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  members     CrmNurtureCampaignMember[]
+
+  @@index([isActive])
+  @@map("crm_nurture_campaigns")
+}
+
+model CrmNurtureCampaignMember {
+  id          String              @id @default(cuid())
+  campaignId  String
+  campaign    CrmNurtureCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  email       String
+  firstName   String?
+  lastName    String?
+  notes       String?             @db.Text
+  source      String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([campaignId, email])
+  @@index([email])
+  @@index([campaignId])
+  @@map("crm_nurture_campaign_members")
+}

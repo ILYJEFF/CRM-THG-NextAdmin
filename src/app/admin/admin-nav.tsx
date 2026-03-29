@@ -61,6 +61,12 @@ export function AdminNav() {
         <NavLink href="/admin/clients">Active clients</NavLink>
         <NavLink href="/admin/companies">Company accounts</NavLink>
       </NavGroup>
+      <NavGroup label="Marketing">
+        <NavLink href="/admin/marketing/email-templates">
+          Email templates
+        </NavLink>
+        <NavLink href="/admin/marketing/nurture">Nurture campaigns</NavLink>
+      </NavGroup>
     </div>
   );
 }
