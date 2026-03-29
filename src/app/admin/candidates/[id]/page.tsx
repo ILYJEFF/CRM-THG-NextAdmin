@@ -6,6 +6,7 @@ import { CandidateNotesForm } from "@/components/crm/CandidateNotesForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
 import { formatStatusLabel } from "@/lib/crm/pipeline";
 import { marketingResumeUrl } from "@/lib/crm/links";
+import { MarketingDocumentCard } from "@/components/crm/MarketingDocumentCard";
 import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
 import { loadCandidateNotes } from "@/lib/crm/candidate-notes";
 
@@ -73,16 +74,6 @@ export default async function CandidateDetailPage({
           >
             Call
           </a>
-          {resumeHref ? (
-            <a
-              href={resumeHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl bg-amber-500 px-4 text-sm font-semibold text-zinc-950 active:bg-amber-600 sm:flex-initial sm:px-6"
-            >
-              Open resume
-            </a>
-          ) : null}
         </div>
         <dl className="mt-5 space-y-3 text-sm">
           <div>
@@ -103,6 +94,14 @@ export default async function CandidateDetailPage({
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
         <CandidateStatusSelect id={c.id} current={c.status} />
       </section>
+
+      <MarketingDocumentCard
+        title="Resume"
+        description="Primary document from the candidate application."
+        href={resumeHref}
+        fileLabel="Open resume"
+        emptyText="No resume file is linked. The candidate may have applied before uploads were required, or storage failed."
+      />
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">

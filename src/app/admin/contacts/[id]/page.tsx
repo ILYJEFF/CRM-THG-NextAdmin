@@ -5,6 +5,8 @@ import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
 import { ContactNotesForm } from "@/components/crm/ContactNotesForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
 import { formatStatusLabel } from "@/lib/crm/pipeline";
+import { marketingAssetUrl } from "@/lib/crm/links";
+import { MarketingDocumentCard } from "@/components/crm/MarketingDocumentCard";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,8 @@ export default async function ContactDetailPage({
   const { id } = params;
   const contact = await prisma.crmContact.findUnique({ where: { id } });
   if (!contact) notFound();
+
+  const jobDescriptionHref = marketingAssetUrl(contact.jobDescriptionUrl);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 md:max-w-3xl">
@@ -117,6 +121,13 @@ export default async function ContactDetailPage({
           Submitted {format(contact.createdAt, "MMMM d, yyyy 'at' h:mm a")}
         </p>
       </section>
+
+      <MarketingDocumentCard
+        title="Job description"
+        description="Uploaded from the client contact form, if provided."
+        href={jobDescriptionHref}
+        fileLabel="Open job description"
+      />
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
         <ContactNotesForm id={contact.id} initial={contact.notes} />

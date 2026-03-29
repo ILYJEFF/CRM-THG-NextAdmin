@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     "status",
     "notes",
     "message",
+    "jobDescriptionUrl",
     "createdAt",
     "updatedAt",
   ];
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
       r.status,
       r.notes ?? "",
       r.message,
+      r.jobDescriptionUrl ?? "",
       r.createdAt.toISOString(),
       r.updatedAt.toISOString(),
     ]);

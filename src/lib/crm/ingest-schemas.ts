@@ -13,6 +13,7 @@ export const contactIngestSchema = z.object({
   city: z.string().min(1),
   industry: z.string().nullable().optional(),
   message: z.string().min(1),
+  jobDescriptionUrl: z.string().nullable().optional(),
   status: z.string().min(1),
   notes: z.string().nullable().optional(),
   createdAt: isoDateString,

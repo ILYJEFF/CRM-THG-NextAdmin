@@ -20,6 +20,7 @@ import {
   parseSort,
   totalPages,
 } from "@/lib/crm/pagination";
+import { marketingAssetUrl } from "@/lib/crm/links";
 
 export const dynamic = "force-dynamic";
 
@@ -145,6 +146,11 @@ export default async function ContactsPage({
                 <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-zinc-600">
                   {c.message}
                 </p>
+                {c.jobDescriptionUrl ? (
+                  <p className="mt-2 text-xs font-semibold text-emerald-800">
+                    Job description on file
+                  </p>
+                ) : null}
                 <p className="mt-3 text-xs font-semibold text-amber-800">
                   Open lead →
                 </p>
@@ -175,6 +181,9 @@ export default async function ContactsPage({
                   Message
                 </th>
                 <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
+                  JD
+                </th>
+                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
                   Stage
                 </th>
               </tr>
@@ -183,14 +192,16 @@ export default async function ContactsPage({
               {contacts.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-4 py-12 text-center text-zinc-500"
                   >
                     No leads match this view.
                   </td>
                 </tr>
               ) : (
-                contacts.map((c) => (
+                contacts.map((c) => {
+                  const jdHref = marketingAssetUrl(c.jobDescriptionUrl);
+                  return (
                   <tr
                     key={c.id}
                     className="transition hover:bg-amber-50/40"
@@ -226,13 +237,28 @@ export default async function ContactsPage({
                       </p>
                     </td>
                     <td className="px-4 py-3 align-top">
+                      {jdHref ? (
+                        <a
+                          href={jdHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-semibold text-emerald-800 hover:underline"
+                        >
+                          Open
+                        </a>
+                      ) : (
+                        <span className="text-zinc-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 align-top">
                       <StatusBadge
                         status={c.status}
                         label={formatStatusLabel(c.status, "client")}
                       />
                     </td>
                   </tr>
-                ))
+                );
+                })
               )}
             </tbody>
           </table>
