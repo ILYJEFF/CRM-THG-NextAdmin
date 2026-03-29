@@ -6,18 +6,18 @@ export const dynamic = "force-dynamic";
 export default async function CandidatesPage() {
   const candidates = await prisma.crmCandidate.findMany({
     orderBy: { createdAt: "desc" },
-    take: 200,
+    take: 1000,
   });
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-semibold text-zinc-900 tracking-tight">
-          Candidates
+          Resume submissions
         </h1>
         <p className="mt-1 text-sm text-zinc-600">
-          Resume submissions from the marketing site ({candidates.length}{" "}
-          shown).
+          thehammittgroup.com resume / candidate form: {candidates.length}{" "}
+          shown (newest first, up to 1000).
         </p>
       </div>
 

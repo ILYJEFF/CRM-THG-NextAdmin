@@ -58,8 +58,8 @@ export default function AdminLayout({
           <nav className="flex border-t border-zinc-800/80">
             {[
               { href: "/admin", label: "Overview" },
-              { href: "/admin/contacts", label: "Contacts" },
-              { href: "/admin/candidates", label: "Candidates" },
+              { href: "/admin/contacts", label: "Contact" },
+              { href: "/admin/candidates", label: "Resume" },
             ].map((item) => (
               <Link
                 key={item.href}

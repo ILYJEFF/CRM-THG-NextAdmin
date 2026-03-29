@@ -6,17 +6,18 @@ export const dynamic = "force-dynamic";
 export default async function ContactsPage() {
   const contacts = await prisma.crmContact.findMany({
     orderBy: { createdAt: "desc" },
-    take: 200,
+    take: 1000,
   });
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-semibold text-zinc-900 tracking-tight">
-          Contacts
+          Contact form submissions
         </h1>
         <p className="mt-1 text-sm text-zinc-600">
-          Inquiries from the site contact form ({contacts.length} shown).
+          thehammittgroup.com contact form: {contacts.length} shown (newest
+          first, up to 1000).
         </p>
       </div>
 

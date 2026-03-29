@@ -33,8 +33,8 @@ export function AdminNav() {
   return (
     <>
       <NavLink href="/admin">Overview</NavLink>
-      <NavLink href="/admin/contacts">Contacts</NavLink>
-      <NavLink href="/admin/candidates">Candidates</NavLink>
+      <NavLink href="/admin/contacts">Contact forms</NavLink>
+      <NavLink href="/admin/candidates">Resume forms</NavLink>
     </>
   );
 }

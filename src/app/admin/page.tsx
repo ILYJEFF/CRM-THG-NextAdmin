@@ -41,7 +41,8 @@ export default async function AdminHomePage() {
           Overview
         </h1>
         <p className="mt-1 text-sm text-zinc-600">
-          Leads from the marketing site sync here for your team.
+          Contact and resume submissions from thehammittgroup.com sync into
+          this CRM (live forms plus any backfill you run from the site repo).
         </p>
       </div>
 
@@ -51,7 +52,7 @@ export default async function AdminHomePage() {
           className="group rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm transition hover:border-amber-200/80 hover:shadow-md"
         >
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Contacts
+            Contact forms
           </p>
           <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
             {contactCount}
@@ -65,7 +66,7 @@ export default async function AdminHomePage() {
           className="group rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm transition hover:border-amber-200/80 hover:shadow-md"
         >
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Candidates
+            Resume forms
           </p>
           <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
             {candidateCount}
@@ -80,7 +81,7 @@ export default async function AdminHomePage() {
         <section>
           <div className="flex items-baseline justify-between mb-4">
             <h2 className="text-sm font-semibold text-zinc-900">
-              Recent contacts
+              Recent contact forms
             </h2>
             <Link
               href="/admin/contacts"
@@ -117,7 +118,7 @@ export default async function AdminHomePage() {
         <section>
           <div className="flex items-baseline justify-between mb-4">
             <h2 className="text-sm font-semibold text-zinc-900">
-              Recent candidates
+              Recent resume submissions
             </h2>
             <Link
               href="/admin/candidates"
