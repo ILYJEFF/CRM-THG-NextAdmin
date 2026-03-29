@@ -12,6 +12,7 @@ import { isCrmS3Configured } from "@/lib/crm/s3-contracts";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
 import { ClientsModulePlaceholder } from "@/components/crm/ClientsModulePlaceholder";
 import { JobOrderCareerPanel } from "@/components/crm/JobOrderCareerPanel";
+import { CrmActivitySection } from "@/components/crm/CrmActivitySection";
 
 export const dynamic = "force-dynamic";
 
@@ -161,6 +162,8 @@ export default async function ClientDetailPage({
           initial={client.internalNotes}
         />
       </section>
+
+      <CrmActivitySection entityType="client" entityId={client.id} />
 
       <section className="space-y-4">
         <div className="flex items-end justify-between gap-3">

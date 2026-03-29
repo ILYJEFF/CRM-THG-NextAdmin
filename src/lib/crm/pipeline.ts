@@ -40,6 +40,16 @@ export const TALENT_STATUSES = [
   { value: "archived", label: "Archived" },
 ] as const;
 
+/** Logged touches on leads, clients, and candidates */
+export const CRM_ACTIVITY_TYPES = [
+  { value: "note", label: "Note" },
+  { value: "call", label: "Call" },
+  { value: "email", label: "Email" },
+  { value: "meeting", label: "Meeting" },
+  { value: "task", label: "Task / follow-up" },
+  { value: "other", label: "Other" },
+] as const;
+
 /** Candidate matched to a specific client job order */
 export const SUBMISSION_STAGES = [
   { value: "triage", label: "Triage" },
@@ -95,6 +105,16 @@ export function jobOrderStatusBadgeClass(status: string): string {
 export function formatJobOrderStatusLabel(status: string): string {
   const found = JOB_ORDER_STATUSES.find((x) => x.value === status);
   return found?.label ?? status;
+}
+
+export function formatActivityTypeLabel(type: string): string {
+  const found = CRM_ACTIVITY_TYPES.find((x) => x.value === type);
+  return found?.label ?? type;
+}
+
+export function normalizeActivityType(raw: string): string {
+  const t = (raw || "note").trim().slice(0, 32);
+  return CRM_ACTIVITY_TYPES.some((x) => x.value === t) ? t : "note";
 }
 
 export function formatSubmissionStageLabel(stage: string): string {

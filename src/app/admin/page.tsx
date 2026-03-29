@@ -13,6 +13,8 @@ import {
   crmContactScalarSelectLegacy,
 } from "@/lib/crm/crm-contact-select";
 import { getCrmDbGate } from "@/lib/crm/crm-db-gate";
+import { getActivitiesModuleReady } from "@/lib/crm/activities-module";
+import { formatActivityTypeLabel } from "@/lib/crm/pipeline";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +93,30 @@ export default async function AdminHomePage() {
   const talentPipeline = Object.fromEntries(
     candidateGroups.map((g) => [g.status, g._count])
   );
+
+  const activitiesReady = await getActivitiesModuleReady();
+  const recentLoggedActivities = activitiesReady
+    ? await prisma.crmActivity.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 14,
+      })
+    : [];
+
+  function activityRecordHref(a: { entityType: string; entityId: string }) {
+    if (a.entityType === "contact") {
+      return `/admin/contacts/${a.entityId}`;
+    }
+    if (a.entityType === "client") {
+      return `/admin/clients/${a.entityId}`;
+    }
+    return `/admin/candidates/${a.entityId}`;
+  }
+
+  function activityEntityLabel(entityType: string) {
+    if (entityType === "contact") return "Lead";
+    if (entityType === "client") return "Client";
+    return "Candidate";
+  }
 
   return (
     <div className="space-y-8 md:space-y-10">
@@ -253,11 +279,49 @@ export default async function AdminHomePage() {
         </section>
       </div>
 
+      {activitiesReady && recentLoggedActivities.length > 0 ? (
+        <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-zinc-900">
+            Recent logged activity
+          </h2>
+          <p className="mt-1 text-xs text-zinc-500">
+            Calls, emails, and notes your team added in the CRM.
+          </p>
+          <ul className="mt-4 divide-y divide-zinc-100">
+            {recentLoggedActivities.map((a) => (
+              <li key={a.id} className="py-3 first:pt-0">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <Link
+                    href={activityRecordHref(a)}
+                    className="text-sm font-medium text-amber-900 hover:underline"
+                  >
+                    {formatActivityTypeLabel(a.activityType)}
+                    <span className="font-normal text-zinc-500">
+                      {" "}
+                      · {activityEntityLabel(a.entityType)}
+                    </span>
+                  </Link>
+                  <time
+                    dateTime={a.createdAt.toISOString()}
+                    className="text-xs tabular-nums text-zinc-400"
+                  >
+                    {format(a.createdAt, "MMM d, h:mm a")}
+                  </time>
+                </div>
+                <p className="mt-1 line-clamp-2 text-sm text-zinc-600">
+                  {a.body}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <div className="grid gap-8 lg:grid-cols-2">
         <section>
           <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-zinc-900">
-              Latest client activity
+              Latest lead submissions
             </h2>
             <Link
               href="/admin/contacts"

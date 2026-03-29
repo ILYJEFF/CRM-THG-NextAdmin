@@ -4,6 +4,7 @@ import {
   formatSubmissionStageLabel,
   normalizeSubmissionStage,
   formatStatusLabel,
+  formatActivityTypeLabel,
 } from "../pipeline";
 
 describe("pipeline labels", () => {
@@ -25,5 +26,10 @@ describe("pipeline labels", () => {
 
   it("formats talent status", () => {
     expect(formatStatusLabel("screening", "talent")).toBe("Screening");
+  });
+
+  it("formats CRM activity types", () => {
+    expect(formatActivityTypeLabel("call")).toBe("Call");
+    expect(formatActivityTypeLabel("custom")).toBe("custom");
   });
 });

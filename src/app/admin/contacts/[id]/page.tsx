@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
 import { LeadDangerZone } from "@/components/crm/LeadDangerZone";
+import { CrmActivitySection } from "@/components/crm/CrmActivitySection";
 import { ContactNotesForm } from "@/components/crm/ContactNotesForm";
 import { StatusBadge } from "@/components/crm/StatusBadge";
 import { formatStatusLabel } from "@/lib/crm/pipeline";
@@ -190,6 +191,8 @@ export default async function ContactDetailPage({
         href={jobDescriptionHref}
         fileLabel="Open job description"
       />
+
+      <CrmActivitySection entityType="contact" entityId={contact.id} />
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
         <ContactNotesForm id={contact.id} initial={contact.notes} />

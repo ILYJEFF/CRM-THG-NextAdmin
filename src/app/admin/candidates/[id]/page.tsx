@@ -11,6 +11,7 @@ import { crmCandidateScalarSelect } from "@/lib/crm/candidate-select";
 import { loadCandidateNotes } from "@/lib/crm/candidate-notes";
 import { getSubmissionsModuleReady } from "@/lib/crm/submissions-module";
 import { CandidateJobAssignments } from "@/components/crm/CandidateJobAssignments";
+import { CrmActivitySection } from "@/components/crm/CrmActivitySection";
 
 export const dynamic = "force-dynamic";
 
@@ -188,6 +189,8 @@ export default async function CandidateDetailPage({
           </p>
         </section>
       ) : null}
+
+      <CrmActivitySection entityType="candidate" entityId={c.id} />
 
       <section className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm">
         <CandidateNotesForm id={c.id} initial={notes} />

@@ -7,7 +7,9 @@ import {
   normalizeClientStatus,
   normalizeTalentStatus,
   normalizeSubmissionStage,
+  normalizeActivityType,
 } from "@/lib/crm/pipeline";
+import { getCrmSessionUser } from "@/lib/crm/auth-crm";
 import { syncJobOrderToMarketing } from "@/lib/crm/marketing-career-sync";
 
 export async function updateContactStatus(id: string, status: string) {
@@ -555,4 +557,81 @@ export async function removeSubmission(
       error: e instanceof Error ? e.message : "Could not remove.",
     };
   }
+}
+
+const addActivitySchema = z.object({
+  activityType: z.string().optional(),
+  body: z.string().trim().min(1).max(16000),
+});
+
+export async function addCrmActivity(
+  entityType: "contact" | "client" | "candidate",
+  entityId: string,
+  raw: { activityType?: string; body: string }
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const parsed = addActivitySchema.safeParse(raw);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid activity",
+    };
+  }
+
+  const user = await getCrmSessionUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to log activity." };
+  }
+
+  if (entityType === "contact") {
+    const row = await prisma.crmContact.findUnique({
+      where: { id: entityId },
+      select: { id: true },
+    });
+    if (!row) return { ok: false, error: "Lead not found." };
+  } else if (entityType === "client") {
+    const row = await prisma.crmClient.findUnique({
+      where: { id: entityId },
+      select: { id: true },
+    });
+    if (!row) return { ok: false, error: "Client not found." };
+  } else {
+    const row = await prisma.crmCandidate.findUnique({
+      where: { id: entityId },
+      select: { id: true },
+    });
+    if (!row) return { ok: false, error: "Candidate not found." };
+  }
+
+  try {
+    await prisma.crmActivity.create({
+      data: {
+        entityType,
+        entityId,
+        activityType: normalizeActivityType(parsed.data.activityType ?? "note"),
+        body: parsed.data.body,
+        actorEmail: user.email ?? null,
+      },
+    });
+  } catch (e) {
+    return {
+      ok: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "Could not save activity. Run prisma/sql/add_crm_activities.sql or db push.",
+    };
+  }
+
+  if (entityType === "contact") {
+    revalidatePath(`/admin/contacts/${entityId}`);
+    revalidatePath("/admin/contacts");
+  } else if (entityType === "client") {
+    revalidatePath(`/admin/clients/${entityId}`);
+    revalidatePath("/admin/clients");
+  } else {
+    revalidatePath(`/admin/candidates/${entityId}`);
+    revalidatePath("/admin/candidates");
+  }
+  revalidatePath("/admin");
+  return { ok: true };
 }

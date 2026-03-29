@@ -133,3 +133,18 @@ model CrmCandidate {
 
   @@map("crm_candidates")
 }
+
+/// Touch history: calls, emails, meetings, notes on a lead, client, or candidate
+model CrmActivity {
+  id           String   @id @default(cuid())
+  entityType   String
+  entityId     String
+  activityType String   @default("note")
+  body         String   @db.Text
+  actorEmail   String?
+  createdAt    DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("crm_activities")
+}
