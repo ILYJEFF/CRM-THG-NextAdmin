@@ -32,9 +32,9 @@ function NavLink({
 export function AdminNav() {
   return (
     <>
-      <NavLink href="/admin">Overview</NavLink>
-      <NavLink href="/admin/contacts">Contact forms</NavLink>
-      <NavLink href="/admin/candidates">Resume forms</NavLink>
+      <NavLink href="/admin">Recruiting desk</NavLink>
+      <NavLink href="/admin/contacts">Client leads</NavLink>
+      <NavLink href="/admin/candidates">Talent pipeline</NavLink>
     </>
   );
 }

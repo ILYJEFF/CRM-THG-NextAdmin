@@ -1,51 +1,146 @@
+import Link from "next/link";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
+import { FilterChips } from "@/components/crm/FilterChips";
+import { SearchForm } from "@/components/crm/SearchForm";
+import { StatusBadge } from "@/components/crm/StatusBadge";
+import { TALENT_STATUSES, formatStatusLabel } from "@/lib/crm/pipeline";
+import {
+  buildListSearchParams,
+  candidateWhere,
+} from "@/lib/crm/list-query";
+import { marketingResumeUrl } from "@/lib/crm/links";
 
 export const dynamic = "force-dynamic";
 
-export default async function CandidatesPage() {
+function SearchFallback() {
+  return (
+    <div className="min-h-12 animate-pulse rounded-2xl bg-zinc-200/60" aria-hidden />
+  );
+}
+
+export default async function CandidatesPage({
+  searchParams,
+}: {
+  searchParams: Record<string, string | string[] | undefined>;
+}) {
+  const q = typeof searchParams.q === "string" ? searchParams.q : undefined;
+  const status =
+    typeof searchParams.status === "string" ? searchParams.status : undefined;
+
+  const chipBase = { q };
+
   const candidates = await prisma.crmCandidate.findMany({
+    where: candidateWhere(q, status),
     orderBy: { createdAt: "desc" },
-    take: 1000,
+    take: 500,
   });
 
+  const chips = [
+    {
+      href: `/admin/candidates${buildListSearchParams(chipBase, { status: null })}`,
+      label: "All",
+      active: !status,
+    },
+    ...TALENT_STATUSES.map((s) => ({
+      href: `/admin/candidates${buildListSearchParams(chipBase, { status: s.value })}`,
+      label: s.label,
+      active: status === s.value,
+    })),
+  ];
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-semibold text-zinc-900 tracking-tight">
-          Resume submissions
+    <div className="space-y-5 md:space-y-6">
+      <div className="hidden md:block">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
+          Talent pipeline
         </h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          thehammittgroup.com resume / candidate form: {candidates.length}{" "}
-          shown (newest first, up to 1000).
+        <p className="mt-2 text-sm text-zinc-600">
+          Candidates from resume submissions. {candidates.length}{" "}
+          {candidates.length === 1 ? "row" : "rows"} (max 500).
         </p>
       </div>
 
-      <div className="rounded-2xl border border-zinc-200/80 bg-white shadow-sm overflow-hidden">
+      <Suspense fallback={<SearchFallback />}>
+        <SearchForm placeholder="Search name, email, role, location…" />
+      </Suspense>
+
+      <FilterChips chips={chips} />
+
+      <ul className="space-y-3 md:hidden">
+        {candidates.length === 0 ? (
+          <li className="rounded-2xl border border-dashed border-zinc-300 bg-white/80 px-4 py-12 text-center text-sm text-zinc-500">
+            No candidates match. Try another filter or search.
+          </li>
+        ) : (
+          candidates.map((c) => {
+            const resumeHref = marketingResumeUrl(c.resumeUrl);
+            return (
+              <li key={c.id}>
+                <Link
+                  href={`/admin/candidates/${c.id}`}
+                  className="block rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-sm transition active:scale-[0.99] hover:border-amber-200/80"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-zinc-900">
+                        {c.firstName} {c.lastName}
+                      </p>
+                      <p className="mt-1 truncate text-sm text-zinc-600">
+                        {c.positionType}
+                      </p>
+                      <p className="mt-0.5 text-xs text-zinc-500">
+                        Wants {c.desiredLocation} · from {c.currentLocation}
+                      </p>
+                      <p className="mt-2 truncate text-xs text-zinc-400">
+                        {format(c.createdAt, "MMM d, yyyy")}
+                      </p>
+                    </div>
+                    <StatusBadge
+                      status={c.status}
+                      label={formatStatusLabel(c.status, "talent")}
+                      className="shrink-0"
+                    />
+                  </div>
+                  {resumeHref ? (
+                    <p className="mt-3 text-xs font-semibold text-amber-800">
+                      Resume on file · tap to open profile
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-xs font-semibold text-zinc-500">
+                      Open profile →
+                    </p>
+                  )}
+                </Link>
+              </li>
+            );
+          })
+        )}
+      </ul>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm md:block">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[800px] text-left text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50/80">
-                <th className="px-4 py-3 font-semibold text-zinc-700 whitespace-nowrap">
-                  When
+              <tr className="border-b border-zinc-200 bg-zinc-50/90">
+                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
+                  Received
                 </th>
-                <th className="px-4 py-3 font-semibold text-zinc-700 whitespace-nowrap">
-                  Name
+                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
+                  Candidate
                 </th>
-                <th className="px-4 py-3 font-semibold text-zinc-700 whitespace-nowrap">
-                  Email
+                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
+                  Target role
                 </th>
-                <th className="px-4 py-3 font-semibold text-zinc-700 whitespace-nowrap">
+                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
                   Locations
                 </th>
-                <th className="px-4 py-3 font-semibold text-zinc-700 whitespace-nowrap">
-                  Role
-                </th>
-                <th className="px-4 py-3 font-semibold text-zinc-700 whitespace-nowrap">
+                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
                   Resume
                 </th>
-                <th className="px-4 py-3 font-semibold text-zinc-700 whitespace-nowrap">
-                  Status
+                <th className="whitespace-nowrap px-4 py-3 font-semibold text-zinc-700">
+                  Stage
                 </th>
               </tr>
             </thead>
@@ -53,80 +148,75 @@ export default async function CandidatesPage() {
               {candidates.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={6}
                     className="px-4 py-12 text-center text-zinc-500"
                   >
-                    No rows in{" "}
-                    <code className="text-xs bg-zinc-100 px-1 rounded">
-                      crm_candidates
-                    </code>
-                    . Run{" "}
-                    <code className="text-xs bg-zinc-100 px-1 rounded">
-                      prisma db push
-                    </code>{" "}
-                    and submit a test application.
+                    No candidates match this view.
                   </td>
                 </tr>
               ) : (
-                candidates.map((c) => (
-                  <tr
-                    key={c.id}
-                    className="hover:bg-amber-50/30 transition-colors"
-                  >
-                    <td className="px-4 py-3 text-zinc-600 whitespace-nowrap align-top">
-                      {format(c.createdAt, "MMM d, yyyy")}
-                      <br />
-                      <span className="text-xs text-zinc-400">
-                        {format(c.createdAt, "h:mm a")}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-medium text-zinc-900 align-top">
-                      {c.firstName} {c.lastName}
-                    </td>
-                    <td className="px-4 py-3 text-zinc-700 align-top break-all max-w-[160px]">
-                      {c.email}
-                    </td>
-                    <td className="px-4 py-3 text-zinc-600 align-top text-xs max-w-[140px]">
-                      <span className="text-zinc-500">From</span>{" "}
-                      {c.currentLocation}
-                      <br />
-                      <span className="text-zinc-500">To</span>{" "}
-                      {c.desiredLocation}
-                    </td>
-                    <td className="px-4 py-3 text-zinc-600 align-top">
-                      <span className="font-medium text-zinc-800">
-                        {c.positionType}
-                      </span>
-                      <span className="block text-xs text-zinc-500 mt-0.5">
-                        {c.industry}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 align-top">
-                      {c.resumeUrl ? (
-                        <a
-                          href={
-                            c.resumeUrl.startsWith("http") ||
-                            c.resumeUrl.startsWith("data:")
-                              ? c.resumeUrl
-                              : `${(process.env.NEXT_PUBLIC_MARKETING_URL || "https://www.thehammittgroup.com").replace(/\/$/, "")}${c.resumeUrl.startsWith("/") ? "" : "/"}${c.resumeUrl}`
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-amber-800 font-medium hover:underline text-xs"
+                candidates.map((c) => {
+                  const resumeHref = marketingResumeUrl(c.resumeUrl);
+                  return (
+                    <tr
+                      key={c.id}
+                      className="transition hover:bg-amber-50/40"
+                    >
+                      <td className="whitespace-nowrap px-4 py-3 align-top text-zinc-600">
+                        {format(c.createdAt, "MMM d, yyyy")}
+                        <span className="block text-xs text-zinc-400">
+                          {format(c.createdAt, "h:mm a")}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <Link
+                          href={`/admin/candidates/${c.id}`}
+                          className="font-medium text-zinc-900 hover:text-amber-900 hover:underline"
                         >
-                          Open
-                        </a>
-                      ) : (
-                        <span className="text-zinc-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 align-top">
-                      <span className="inline-flex rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-700">
-                        {c.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
+                          {c.firstName} {c.lastName}
+                        </Link>
+                        <span className="mt-0.5 block break-all text-xs text-zinc-500">
+                          {c.email}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 align-top text-zinc-700">
+                        <span className="font-medium text-zinc-800">
+                          {c.positionType}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-zinc-500">
+                          {c.industry}
+                        </span>
+                      </td>
+                      <td className="max-w-[140px] px-4 py-3 align-top text-xs text-zinc-600">
+                        <span className="text-zinc-400">Open to</span>{" "}
+                        {c.desiredLocation}
+                        <br />
+                        <span className="text-zinc-400">Based</span>{" "}
+                        {c.currentLocation}
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        {resumeHref ? (
+                          <a
+                            href={resumeHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-semibold text-amber-800 hover:underline"
+                          >
+                            Open file
+                          </a>
+                        ) : (
+                          <span className="text-zinc-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <StatusBadge
+                          status={c.status}
+                          label={formatStatusLabel(c.status, "talent")}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
