@@ -7,6 +7,21 @@ export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) {
+    const { pathname } = request.nextUrl;
+    if (pathname.startsWith("/api/crm/")) {
+      return NextResponse.json(
+        {
+          error:
+            "Server misconfiguration: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY on this deployment.",
+        },
+        { status: 503 }
+      );
+    }
+    if (pathname === "/" || pathname.startsWith("/admin")) {
+      const login = new URL("/login", request.url);
+      login.searchParams.set("error", "config");
+      return NextResponse.redirect(login);
+    }
     return response;
   }
 

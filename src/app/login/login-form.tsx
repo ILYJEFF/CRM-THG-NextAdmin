@@ -8,6 +8,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/admin";
+  const configError = searchParams.get("error") === "config";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +55,23 @@ export function LoginForm() {
         onSubmit={handleSubmit}
         className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm p-8 shadow-2xl shadow-black/40"
       >
+        {configError && (
+          <div
+            className="mb-4 rounded-lg border border-amber-700/50 bg-amber-950/40 px-3 py-3 text-sm text-amber-100"
+            role="alert"
+          >
+            This deployment is missing Supabase settings. In Vercel, open the CRM
+            project → Settings → Environment Variables and set{" "}
+            <span className="font-mono text-xs">NEXT_PUBLIC_SUPABASE_URL</span>{" "}
+            and{" "}
+            <span className="font-mono text-xs">
+              NEXT_PUBLIC_SUPABASE_ANON_KEY
+            </span>
+            , then redeploy. Check{" "}
+            <span className="font-mono text-xs">/api/health</span> for a quick
+            status.
+          </div>
+        )}
         {error && (
           <div
             className="mb-4 rounded-lg bg-red-950/50 border border-red-900/60 px-3 py-2 text-sm text-red-200"
