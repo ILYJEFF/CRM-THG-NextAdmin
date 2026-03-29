@@ -16,6 +16,7 @@ export const contactIngestSchema = z.object({
   payBand: z.string().nullable().optional(),
   message: z.string().min(1),
   jobDescriptionUrl: z.string().nullable().optional(),
+  pipelineStage: z.string().min(1).optional(),
   status: z.string().min(1),
   notes: z.string().nullable().optional(),
   createdAt: isoDateString,

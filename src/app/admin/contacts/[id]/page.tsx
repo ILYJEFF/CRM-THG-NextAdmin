@@ -7,7 +7,10 @@ import { ContactStatusSelect } from "@/components/crm/ContactStatusSelect";
 import { LeadDangerZone } from "@/components/crm/LeadDangerZone";
 import { CrmActivitySection } from "@/components/crm/CrmActivitySection";
 import { ContactNotesForm } from "@/components/crm/ContactNotesForm";
-import { formatStatusLabel } from "@/lib/crm/pipeline";
+import {
+  formatMarketingPipelineStageLabel,
+  formatStatusLabel,
+} from "@/lib/crm/pipeline";
 import { marketingAssetUrl } from "@/lib/crm/links";
 import {
   crmContactScalarSelect,
@@ -166,6 +169,18 @@ export default async function ContactDetailPage({
                   <dd className="mt-1 text-sm font-medium text-zinc-900">
                     {contact.city}
                   </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    Website pipeline
+                  </dt>
+                  <dd className="mt-1 text-sm font-medium text-violet-950">
+                    {formatMarketingPipelineStageLabel(contact.pipelineStage)}
+                  </dd>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                    Stage from the marketing admin spreadsheet. Desk status above
+                    is separate until you convert this lead.
+                  </p>
                 </div>
                 {contact.industry ? (
                   <div>

@@ -19,6 +19,8 @@ model CrmContact {
   payBand           String?
   message           String
   jobDescriptionUrl String?
+  /// Mirrors marketing-site lead pipeline when synced from the public form.
+  pipelineStage     String     @default("inbox")
   status            String     @default("new")
   notes             String?
   clientId          String?    @unique

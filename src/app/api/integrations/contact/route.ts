@@ -10,18 +10,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function isMissingJobDescriptionUrlColumn(error: unknown): boolean {
-  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false;
-  const col =
-    error.meta &&
-    typeof error.meta === "object" &&
-    "column" in error.meta &&
-    typeof (error.meta as { column?: unknown }).column === "string"
-      ? String((error.meta as { column: string }).column).toLowerCase()
-      : "";
-  if (col.includes("jobdescriptionurl")) return true;
-  const m = error.message.toLowerCase();
-  return error.code === "P2022" && m.includes("jobdescriptionurl");
+function isP2022(error: unknown): error is Prisma.PrismaClientKnownRequestError {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2022"
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -50,6 +43,8 @@ export async function POST(request: NextRequest) {
   const d = parsed.data;
   const createdAt = new Date(d.createdAt);
   const updatedAt = new Date(d.updatedAt);
+  const pipelineStage = d.pipelineStage ?? "inbox";
+  const jd = d.jobDescriptionUrl ?? null;
 
   const baseCreate = {
     id: d.id,
@@ -83,29 +78,44 @@ export async function POST(request: NextRequest) {
     updatedAt,
   };
 
-  const jd = d.jobDescriptionUrl ?? null;
+  const tries: { useJd: boolean; usePipeline: boolean }[] = [
+    { useJd: true, usePipeline: true },
+    { useJd: true, usePipeline: false },
+    { useJd: false, usePipeline: true },
+    { useJd: false, usePipeline: false },
+  ];
 
   try {
-    try {
-      await prisma.crmContact.upsert({
-        where: { id: d.id },
-        create: { ...baseCreate, jobDescriptionUrl: jd },
-        update: { ...baseUpdate, jobDescriptionUrl: jd },
-      });
-    } catch (e) {
-      if (isMissingJobDescriptionUrlColumn(e)) {
-        console.warn(
-          "[integrations/contact] crm_contacts.jobDescriptionUrl missing; upsert without it. Run prisma db push or prisma/sql/add_contact_job_description_url.sql"
-        );
+    let lastError: unknown;
+    for (const t of tries) {
+      if (t.useJd && !jd) {
+        continue;
+      }
+      const extraCreate: Record<string, unknown> = {};
+      const extraUpdate: Record<string, unknown> = {};
+      if (t.usePipeline) {
+        extraCreate.pipelineStage = pipelineStage;
+        extraUpdate.pipelineStage = pipelineStage;
+      }
+      if (t.useJd && jd) {
+        extraCreate.jobDescriptionUrl = jd;
+        extraUpdate.jobDescriptionUrl = jd;
+      }
+      try {
         await prisma.crmContact.upsert({
           where: { id: d.id },
-          create: baseCreate,
-          update: baseUpdate,
+          create: { ...baseCreate, ...extraCreate },
+          update: { ...baseUpdate, ...extraUpdate },
         });
-      } else {
-        throw e;
+        return NextResponse.json({ ok: true, id: d.id });
+      } catch (e) {
+        lastError = e;
+        if (!isP2022(e)) {
+          throw e;
+        }
       }
     }
+    throw lastError;
   } catch (e) {
     const code =
       e && typeof e === "object" && "code" in e
@@ -114,6 +124,4 @@ export async function POST(request: NextRequest) {
     console.error("[integrations/contact]", code || "", e);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true, id: d.id });
 }

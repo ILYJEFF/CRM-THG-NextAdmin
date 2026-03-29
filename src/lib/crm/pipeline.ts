@@ -1,3 +1,20 @@
+/** Marketing-site spreadsheet stages (synced on `CrmContact.pipelineStage`). */
+export const MARKETING_LEAD_PIPELINE_LABELS: Record<string, string> = {
+  inbox: "Inbox",
+  contacted: "Contacted",
+  qualified: "Qualified",
+  proposal: "Proposal",
+  negotiation: "Negotiation",
+  closed_won: "Closed won",
+  closed_lost: "Closed lost",
+  on_hold: "On hold",
+};
+
+export function formatMarketingPipelineStageLabel(stage: string): string {
+  const key = stage.trim().toLowerCase();
+  return MARKETING_LEAD_PIPELINE_LABELS[key] ?? stage;
+}
+
 /** Client inquiry pipeline (employers / hiring leads from the site) */
 export const CLIENT_LEAD_STATUSES = [
   { value: "new", label: "New" },
